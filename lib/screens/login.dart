@@ -18,16 +18,19 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   String _email, _password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
         backgroundColor: kBackgroundColor,
-        elevation: 0,
-        title: Text('Sign in'),
-      ),
 
+        elevation: 0.0,
+        title: Text('Sign in',
+        style: TextStyle(color: Colors.black),
+        ),
+      ),
       body:
       SingleChildScrollView(
         child: Padding(
