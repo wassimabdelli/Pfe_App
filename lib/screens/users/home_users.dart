@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../contants.dart';
+import '../../Widgets/contants.dart';
 
 class Home extends StatefulWidget {
   const Home({Key key}) : super(key: key);

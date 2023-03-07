@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,12 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rv_firebase/Model/users.dart';
 import 'package:rv_firebase/Repository/user.repo.dart';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 
-import '../contants.dart';
-import 'home.dart';
-import 'login.dart';
+import '../../Widgets/contants.dart';
+import 'home_users.dart';
+import '../login.dart';
 
 class Register extends StatefulWidget {
   const Register({Key key}) : super(key: key);
@@ -26,6 +28,8 @@ class _RegisterState extends State<Register> {
   final _ctrlname = TextEditingController();
   final _ctrdate = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  PickedFile _imgFile;
+  final ImagePicker _Picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,6 +60,10 @@ class _RegisterState extends State<Register> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                 ),
                 Image.asset("assets/login.png"),
+               imageProfile(context),
+                SizedBox(
+                  height: 5,
+                ),
                 TextFormField(
                   decoration: textInputDecoration.copyWith(
                       labelText: "First Name",
@@ -106,7 +114,9 @@ class _RegisterState extends State<Register> {
                 ),
                 SizedBox(
                   height: 30,
-                ),  TextFormField(
+                ),
+
+                TextFormField(
                   controller: _ctrdate,
                   decoration: textInputDecoration.copyWith(
                       labelText: "enter date",
@@ -214,34 +224,88 @@ class _RegisterState extends State<Register> {
           'date': _ctrdate.text,
         };
         await docUser.set(json);
-        Widget okButton = TextButton(
-          child: Text("OK"),
-          onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Home()));
-          },
-        );
-
-        // set up the AlertDialog
-        AlertDialog alert = AlertDialog(
-          backgroundColor: kBackgroundColor,
-          title: Text("registration"),
-          content: Text("your registration is successfully validated."),
-          actions: [
-            okButton,
-          ],
-        );
-
-        // show the dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return alert;
-          },
-        );
+        alertRegister(context);
       } catch (e) {
-        print(e.message);
+        print(e.code);
       }
     }
+  }
+  Widget imageProfile(page){
+    return Center(
+      child: Stack(children: <Widget> [
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage: _imgFile==null? AssetImage("assets/avatar.png"):FileImage(File(_imgFile.path)),
+        ),
+        Positioned(
+          bottom: 20.0,
+          right: 20.0,
+          child: InkWell(
+            onTap:(){
+              showModalBottomSheet(
+                  backgroundColor: kBackgroundColor,
+                  context: page,
+                  builder: ( (builder) => bouttonimage(page) )
+              );
+            },
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.teal,
+              size: 28.0,
+            ),
+          ),
+        )
+      ],),
+    );
+  }
+  bouttonimage(page)
+  {
+    return Container(
+        color: kBackgroundColor,
+        height: 110.0,
+        width: MediaQuery.of(page).size.width,
+        margin: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 20,
+        ),
+        child: Column(
+          children:<Widget>[
+            Text("Choose profile photo",
+              style: TextStyle(
+                fontSize: 20.0,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:<Widget> [
+                FlatButton.icon(
+                  icon: Icon(Icons.camera),
+                  onPressed: (){
+                    takephoto(ImageSource.camera);
+                  },
+                  label: Text("Camera"),
+                ),
+                FlatButton.icon(
+                  icon: Icon(Icons.image),
+                  onPressed: (){
+                    takephoto(ImageSource.gallery);
+                  },
+                  label: Text("gallery"),
+                ),
+              ],
+            ),
+          ],
+        )
+    );
+  }
+  void takephoto(ImageSource source) async {
+    final pickedFile = await _Picker.getImage(source: source);
+    setState( ()
+    {
+      _imgFile = pickedFile ;
+    });
   }
 }

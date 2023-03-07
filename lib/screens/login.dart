@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
-import 'package:rv_firebase/screens/home.dart';
-import 'package:rv_firebase/screens/register.dart';
+import 'package:rv_firebase/screens/users/home_users.dart';
+import 'package:rv_firebase/screens/users/register.dart';
+import 'package:rv_firebase/screens/users/register.dart';
 
-import '../contants.dart';
+import '../Widgets/contants.dart';
 
 class Login extends StatefulWidget {
   const Login({Key key}) : super(key: key);

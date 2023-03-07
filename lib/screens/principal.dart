@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:rv_firebase/Widgets/widgets.dart';
 import 'package:rv_firebase/screens/login.dart';
-import 'package:rv_firebase/screens/register.dart';
+import 'package:rv_firebase/screens/users/register.dart';
 
-import '../contants.dart';
+import '../Widgets/contants.dart';
+import 'organizations/Register_org.dart';
 
 class Principal extends StatefulWidget {
   const Principal({Key key}) : super(key: key);
@@ -42,18 +45,16 @@ class _PrincipalState extends State<Principal> {
               primary: Colors.black,
             ),
             onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Register()));
+              alertPrincipal(context);
+
             },
 
           )
         ],
       ),
       body:  Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          child: Text("fsdfs"),
 
-        ),
       ),
 
 
