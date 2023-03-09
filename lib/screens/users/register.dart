@@ -1,18 +1,13 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:rv_firebase/Model/users.dart';
-import 'package:rv_firebase/Repository/user.repo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
-
 import '../../Widgets/contants.dart';
-import 'home_users.dart';
 import '../login.dart';
 
 class Register extends StatefulWidget {
@@ -30,6 +25,8 @@ class _RegisterState extends State<Register> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   PickedFile _imgFile;
   final ImagePicker _Picker = ImagePicker();
+  String selectItem = 'male';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +57,7 @@ class _RegisterState extends State<Register> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                 ),
                 Image.asset("assets/login.png"),
-               imageProfile(context),
+                imageProfile(context),
                 SizedBox(
                   height: 5,
                 ),
@@ -115,7 +112,32 @@ class _RegisterState extends State<Register> {
                 SizedBox(
                   height: 30,
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
 
+                    Text('SEXE'),
+
+                    DropdownButton(
+                      elevation: 0,
+                      items: ['male', 'feminine']
+                          .map((e) =>
+                          DropdownMenuItem(
+                            child: Text('$e'),
+                            value: e,
+                          )).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          selectItem = val.toString();
+                        });
+                      },
+                      value: selectItem,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 30,
+                ),
                 TextFormField(
                   controller: _ctrdate,
                   decoration: textInputDecoration.copyWith(
@@ -125,22 +147,24 @@ class _RegisterState extends State<Register> {
                         color: Colors.indigo,
                       )),
                   readOnly: true,
-                  onTap:() async {
+                  onTap: () async {
                     DateTime pickedDate = await showDatePicker(
                         context: context,
                         initialDate: DateTime.now(),
                         firstDate: DateTime(
                             1940),
                         lastDate: DateTime(2101));
-                    if(pickedDate != null ){
+                    if (pickedDate != null) {
                       print(pickedDate);
-                      DateTime formattedDate = new DateTime(pickedDate.year,pickedDate.month,pickedDate.day) ;
+                      DateTime formattedDate = new DateTime(
+                          pickedDate.year, pickedDate.month, pickedDate.day);
                       print(formattedDate);
 
                       setState(() {
-                        _ctrdate.text = DateFormat('yyyy-MM-dd').format(formattedDate);
+                        _ctrdate.text = DateFormat('yyyy-MM-dd').format(
+                            formattedDate);
                       });
-                    }else{
+                    } else {
                       print("Date is not selected");
                     }
                   },
@@ -207,8 +231,10 @@ class _RegisterState extends State<Register> {
   }
 
   void signup() async {
+
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
+
       try {
         var user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _email,
@@ -216,36 +242,43 @@ class _RegisterState extends State<Register> {
         );
         final currentUSER = FirebaseAuth.instance.currentUser;
 
-        final UID = currentUSER.uid;
+        final UID = currentUSER.uid; // id user
         final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
         final json = {
           'fname': _ctrfname.text,
           'lname': _ctrlname.text,
           'date': _ctrdate.text,
+          'Sexe': selectItem,
         };
         await docUser.set(json);
+        upload(_imgFile,UID);
         alertRegister(context);
+
+
       } catch (e) {
-        print(e.code);
+        print("wassim");
       }
     }
   }
-  Widget imageProfile(page){
+
+  Widget imageProfile(page) {
     return Center(
-      child: Stack(children: <Widget> [
+      child: Stack(children: <Widget>[
         CircleAvatar(
           radius: 80.0,
-          backgroundImage: _imgFile==null? AssetImage("assets/avatar.png"):FileImage(File(_imgFile.path)),
+          backgroundImage: _imgFile == null
+              ? AssetImage("assets/avatar.png")
+              : FileImage(File(_imgFile.path)),
         ),
         Positioned(
           bottom: 20.0,
           right: 20.0,
           child: InkWell(
-            onTap:(){
+            onTap: () {
               showModalBottomSheet(
                   backgroundColor: kBackgroundColor,
                   context: page,
-                  builder: ( (builder) => bouttonimage(page) )
+                  builder: ((builder) => bouttonimage(page))
               );
             },
             child: Icon(
@@ -258,18 +291,21 @@ class _RegisterState extends State<Register> {
       ],),
     );
   }
-  bouttonimage(page)
-  {
+
+  bouttonimage(page) {
     return Container(
         color: kBackgroundColor,
         height: 110.0,
-        width: MediaQuery.of(page).size.width,
+        width: MediaQuery
+            .of(page)
+            .size
+            .width,
         margin: EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 20,
         ),
         child: Column(
-          children:<Widget>[
+          children: <Widget>[
             Text("Choose profile photo",
               style: TextStyle(
                 fontSize: 20.0,
@@ -280,17 +316,17 @@ class _RegisterState extends State<Register> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:<Widget> [
+              children: <Widget>[
                 FlatButton.icon(
                   icon: Icon(Icons.camera),
-                  onPressed: (){
+                  onPressed: () {
                     takephoto(ImageSource.camera);
                   },
                   label: Text("Camera"),
                 ),
                 FlatButton.icon(
                   icon: Icon(Icons.image),
-                  onPressed: (){
+                  onPressed: () {
                     takephoto(ImageSource.gallery);
                   },
                   label: Text("gallery"),
@@ -301,11 +337,11 @@ class _RegisterState extends State<Register> {
         )
     );
   }
+
   void takephoto(ImageSource source) async {
     final pickedFile = await _Picker.getImage(source: source);
-    setState( ()
-    {
-      _imgFile = pickedFile ;
+    setState(() {
+      _imgFile = pickedFile;
     });
   }
 }

@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:rv_firebase/screens/organizations/Register_org.dart';
 import 'package:rv_firebase/screens/users/home_users.dart';
 import 'package:rv_firebase/screens/users/register.dart';
-import 'package:image_picker/image_picker.dart';
 import 'contants.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 const textInputDecoration= InputDecoration(
   labelStyle: TextStyle(color: Colors.black,fontWeight: FontWeight.w300),
     focusedBorder: OutlineInputBorder(
@@ -16,8 +18,6 @@ const textInputDecoration= InputDecoration(
     borderSide: BorderSide(color: Color(0xFFee7b64),width: 2),
          ),
 );
-
-
 
 void nextScreen(context,page){
   Navigator.push(context,MaterialPageRoute(builder: (context) => page ));
@@ -86,84 +86,14 @@ void alertPrincipal(thispage)
   );
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*bouttonimage(page)
-{
-  return Container(
-    color: kBackgroundColor,
-    height: 110.0,
-    width: MediaQuery.of(page).size.width,
-    margin: EdgeInsets.symmetric(
-      horizontal: 20,
-      vertical: 20,
-    ),
-    child: Column(
-      children:<Widget>[
-        Text("Choose profile photo",
-        style: TextStyle(
-          fontSize: 20.0,
-        ),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:<Widget> [
-            FlatButton.icon(
-              icon: Icon(Icons.camera),
-              onPressed: (){
-                takephoto(ImageSource.camera);
-              },
-              label: Text("Camera"),
-            ),
-            FlatButton.icon(
-              icon: Icon(Icons.image),
-              onPressed: (){
-                takephoto(ImageSource.gallery);
-              },
-              label: Text("gallery"),
-            ),
-          ],
-        ),
-      ],
-    )
-  );
-}
+Future<void> upload(pathe,iduser)
+async {
+  var file = File(pathe.path);
+  var nimg = basename(pathe.path); // path heya _imgFile /// basename yaatina essem tasswira
+  String id = iduser;
+  var refstorage = FirebaseStorage.instance.ref("$id/$nimg"); // .ref("images") ==> ipmages sera un dossier dans storage
+  await refstorage.putFile(file);
+   var url = refstorage.getDownloadURL();
 
-PickedFile _imgFile;
-final ImagePicker _Picker = ImagePicker();
-void takephoto(ImageSource source) async {
-  final pickedFile = await _Picker.getImage(source: source);
-  setState()
-  {
-    _imgFile = pickedFile ;
   }
-}
- Widget imageProfile(page){
-  return Center(
-    child: Stack(children: <Widget> [
-    CircleAvatar(
-      radius: 80.0,
-      backgroundImage: AssetImage("assets/avatar.png"),
-    ),
-      Positioned(
-        bottom: 20.0,
-        right: 20.0,
-        child: InkWell(
-          onTap:(){
-            showModalBottomSheet(
-              backgroundColor: kBackgroundColor,
-                context: page,
-                builder: ( (builder) => bouttonimage(page) )
-            );
-          },
-          child: Icon(
-            Icons.camera_alt,
-            color: Colors.teal,
-            size: 28.0,
-          ),
-        ),
-      )
-    ],),
-  );
-}*/
+

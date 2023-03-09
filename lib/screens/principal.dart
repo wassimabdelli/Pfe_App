@@ -52,16 +52,14 @@ class _PrincipalState extends State<Principal> {
           )
         ],
       ),
-      body:  Center(
-          child: Text("fsdfs"),
-
-      ),
-
+      //body:  ,
 
 
 
 
     );
   }
+
+
 }
 
