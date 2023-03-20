@@ -20,8 +20,8 @@ Future deleteUser(String id) async {
   await docUser.delete();
 }
 
-Future get(Users user) async {
-  final docUser = FirebaseFirestore.instance.collection('users').doc(user.id);
+ getimage(id)  {
+  final docUser = FirebaseFirestore.instance.collection('users').doc(id).snapshots();
 }
 
 

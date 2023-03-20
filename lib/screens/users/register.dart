@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import '../../Widgets/contants.dart';
 import '../login.dart';
-
+import 'package:path/path.dart';
 class Register extends StatefulWidget {
   const Register({Key key}) : super(key: key);
 
@@ -116,7 +116,7 @@ class _RegisterState extends State<Register> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
 
-                    Text('SEXE'),
+                    Text('Categorie'),
 
                     DropdownButton(
                       elevation: 0,
@@ -240,23 +240,24 @@ class _RegisterState extends State<Register> {
           email: _email,
           password: _password,
         );
-        final currentUSER = FirebaseAuth.instance.currentUser;
 
+        final currentUSER = FirebaseAuth.instance.currentUser;
         final UID = currentUSER.uid; // id user
+        String loc ='users';
         final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
+        var test = await upload(_imgFile,UID,loc);
         final json = {
           'fname': _ctrfname.text,
           'lname': _ctrlname.text,
           'date': _ctrdate.text,
           'Sexe': selectItem,
+            'img':test,
         };
         await docUser.set(json);
-        upload(_imgFile,UID);
-        alertRegister(context);
-
-
+        upload(_imgFile,UID,loc);
+        alertRegister(this.context,UID);
       } catch (e) {
-        print("wassim");
+        print(e);
       }
     }
   }

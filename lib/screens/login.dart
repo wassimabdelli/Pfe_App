@@ -129,6 +129,7 @@ class _LoginState extends State<Login> {
 
 
   void sign() async {
+
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       try {
@@ -136,8 +137,11 @@ class _LoginState extends State<Login> {
           email: _email,
           password: _password,
         );
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Home()));
+        final currentUSER = FirebaseAuth.instance.currentUser;
+        final UID = currentUSER.uid;
+      /*  Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Home()));*/
+        Navigator.pushNamed(context, '/home',arguments: UID);
       } catch (e) {
         print(e.code);
       }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rv_firebase/screens/organizations/Register_org.dart';
 import 'package:rv_firebase/screens/users/home_users.dart';
@@ -24,13 +25,12 @@ void nextScreen(context,page){
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void alertRegister(page)
+void alertRegister(page,UID)
 {
   Widget okButton = TextButton(
     child: Text("OK"),
     onPressed: () {
-      Navigator.push(
-          page, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushNamed(page, '/home',arguments: UID);
     },
   );
   AlertDialog alert = AlertDialog(
@@ -86,14 +86,29 @@ void alertPrincipal(thispage)
   );
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Future<void> upload(pathe,iduser)
+ upload(pathe,iduser,loc)
 async {
   var file = File(pathe.path);
-  var nimg = basename(pathe.path); // path heya _imgFile /// basename yaatina essem tasswira
+  var nimg = basename(pathe.path); // pathe heya _imgFile /// basename yaatina essem tasswira
   String id = iduser;
-  var refstorage = FirebaseStorage.instance.ref("$id/$nimg"); // .ref("images") ==> ipmages sera un dossier dans storage
+  var refstorage = FirebaseStorage.instance.ref("$loc/$id/$nimg"); // .ref("images") ==> ipmages sera un dossier dans storage
   await refstorage.putFile(file);
    var url = refstorage.getDownloadURL();
-
+   return url;
   }
 
+//-------------------------------------------------------------------------
+Future<String> user_info(String id, String a) async {
+  DocumentReference doc = FirebaseFirestore.instance.collection("users").doc(id);
+  var value = await doc.get();
+  var d = value.data()[a];
+  return d.toString();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+Future<dynamic> imgprofile(String id) async {
+  DocumentReference doc = FirebaseFirestore.instance.collection("users").doc(
+      id);
+  var value = await doc.get();
+  var img = value.data()['img'];
+  return Image.network(img);
+}
