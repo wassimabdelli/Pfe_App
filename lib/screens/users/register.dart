@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import '../../Widgets/contants.dart';
 import '../login.dart';
-import 'package:path/path.dart';
 class Register extends StatefulWidget {
   const Register({Key key}) : super(key: key);
 
@@ -32,7 +31,7 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
+        backgroundColor: appbarBackgroundColor,
         elevation: 0.0,
         title: Text(
           'Sign up',
@@ -116,11 +115,11 @@ class _RegisterState extends State<Register> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
 
-                    Text('Categorie'),
+                    Text('Sexe'),
 
                     DropdownButton(
                       elevation: 0,
-                      items: ['male', 'feminine']
+                      items: ['male', 'female']
                           .map((e) =>
                           DropdownMenuItem(
                             child: Text('$e'),

@@ -112,3 +112,12 @@ Future<dynamic> imgprofile(String id) async {
   var img = value.data()['img'];
   return Image.network(img);
 }
+//-----------------------------------------------------------------------------------------------
+settingsname(fn,ln,UID) async {
+  final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
+  docUser.update({
+    'fname': fn.text,
+    'lname': ln.text,
+
+  });
+}

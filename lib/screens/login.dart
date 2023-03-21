@@ -26,9 +26,8 @@ class _LoginState extends State<Login> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
-
-        elevation: 0.0,
+        backgroundColor: appbarBackgroundColor,
+        elevation:5,
         title: Text('Sign in',
         style: TextStyle(color: Colors.black),
         ),
@@ -93,7 +92,7 @@ class _LoginState extends State<Login> {
                   child: Text('Sign in'),
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(170, 40),
-                    primary: Colors.indigo,
+                    primary:appbarBackgroundColor ,
                     onPrimary: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),

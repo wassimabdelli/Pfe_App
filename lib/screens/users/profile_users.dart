@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rv_firebase/Widgets/contants.dart';
-import 'package:flutter_animations/flutter_animations.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 class Profile_user extends StatefulWidget {
   const Profile_user({Key key}) : super(key: key);
@@ -19,13 +17,13 @@ class _Profile_userState extends State<Profile_user> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
-          backgroundColor: kBackgroundColor,
+          backgroundColor:  appbarBackgroundColor,
           elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,color: Colors.black),
+          icon: Icon(Icons.arrow_back,color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text('User Profile', style: TextStyle(color: Colors.black),
+        title: Text('User Profile', style: TextStyle(color: Colors.white),
       ),
       ),
       body: Center(
@@ -44,12 +42,10 @@ class _Profile_userState extends State<Profile_user> {
                         Navigator.pushNamed(
                             this.context, '/profile_user', arguments: id);
                       },
-
                       child: CircleAvatar(
                         radius: 70,
                         backgroundImage: snapshot.data.image,
                       ),
-
                     );
                   }
                 },
@@ -86,10 +82,7 @@ class _Profile_userState extends State<Profile_user> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.settings),
-                                onPressed: () {
-                                  // Ajoutez ici l'action à effectuer lorsque l'icône de réglages est pressée.
-                                },
+                                icon: Icon(Icons.account_circle_sharp,color: appbarBackgroundColor,),
                               ),
                             ],
                           ),
@@ -110,10 +103,7 @@ class _Profile_userState extends State<Profile_user> {
                                     fontWeight: FontWeight.bold,                          ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.settings),
-                                onPressed: () {
-                                  // Ajoutez ici l'action à effectuer lorsque l'icône de réglages est pressée.
-                                },
+                                icon: Icon(Icons.email,color: appbarBackgroundColor,),
                               ),
                             ],
                           ),
@@ -135,7 +125,7 @@ class _Profile_userState extends State<Profile_user> {
                                       snapshot.data,
                                       style: TextStyle(
                                         fontSize: 18.0,
-                                        fontWeight: FontWeight.bold,                             ),
+                                        fontWeight: FontWeight.bold,),
                                     );
                                   }
                                   // On peut retourner un widget de chargement ou un texte "Chargement en cours"
@@ -143,10 +133,7 @@ class _Profile_userState extends State<Profile_user> {
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.settings),
-                                onPressed: () {
-                                  // Ajoutez ici l'action à effectuer lorsque l'icône de réglages est pressée.
-                                },
+                                icon: Icon(Icons.calendar_today,color: appbarBackgroundColor,),
                               ),
                             ],
                           ),
@@ -177,10 +164,7 @@ class _Profile_userState extends State<Profile_user> {
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.settings),
-                                onPressed: () {
-                                  // Ajoutez ici l'action à effectuer lorsque l'icône de réglages est pressée.
-                                },
+                                icon: Icon(Icons.male,color: appbarBackgroundColor,),
                               ),
 
                             ],
@@ -191,9 +175,18 @@ class _Profile_userState extends State<Profile_user> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
-                                  // Action à effectuer lorsque le bouton est pressé
+                                  Navigator.pushNamed(
+                                      this.context, '/settings_user_profile', arguments: id);
                                 },
-                                child: Text('Modifier le profil'),
+                                child: Text('change profil'),
+                                style: ElevatedButton.styleFrom(
+                                  fixedSize: Size(170, 40),
+                                  primary:appbarBackgroundColor ,
+                                  onPrimary: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              ),
                               ),
                             ],
                           ),
@@ -210,4 +203,3 @@ class _Profile_userState extends State<Profile_user> {
   }
 
 }
-

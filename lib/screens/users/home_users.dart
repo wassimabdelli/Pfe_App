@@ -24,7 +24,7 @@
      String id = ModalRoute.of(context).settings.arguments;
       return Scaffold(
         appBar:AppBar(
-          backgroundColor: kBackgroundColor,
+          backgroundColor: appbarBackgroundColor,
           elevation: 0,
           leading:  IconButton(
             icon: Icon(

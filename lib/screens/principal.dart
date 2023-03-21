@@ -20,10 +20,8 @@ class _PrincipalState extends State<Principal> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
-
-        backgroundColor: kBackgroundColor,
-
-        elevation: 0.0,
+        backgroundColor: appbarBackgroundColor,
+        elevation: 10,
         title: Text('Holistic Wenter',
           style: TextStyle(color: Colors.black),
         ),
