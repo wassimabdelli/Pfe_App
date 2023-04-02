@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 
@@ -15,16 +19,20 @@ class _settings_allState extends State<settings_all> {
   String id;
   String firstName = '';
   String lastName = '';
-  String gender = 'female';
+  String gender = '';
+  DateTime datee ;
   TextEditingController _ctrfname;
   TextEditingController _ctrlname;
-
+  TextEditingController _ctrdate;
+  PickedFile _imgFile;
+  String img ="" ;
+  final ImagePicker _Picker = ImagePicker();
   @override
   void initState() {
     super.initState();
     _ctrfname = TextEditingController();
     _ctrlname = TextEditingController();
-
+    _ctrdate = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       id = ModalRoute.of(context).settings.arguments;
 
@@ -39,6 +47,22 @@ class _settings_allState extends State<settings_all> {
         setState(() {
           lastName = value;
           _ctrlname.text = lastName;
+        });
+      });
+      user_info(id, 'Sexe').then((value) {
+        setState(() {
+          gender = value;
+        });
+      });
+      user_info(id, 'date').then((value) {
+        setState(() {
+          datee = DateTime.parse(value);
+          _ctrdate.text = value;
+        });
+      });
+      user_info(id, 'img').then((value) {
+        setState(() {
+        img = value;
         });
       });
     });
@@ -72,6 +96,10 @@ class _settings_allState extends State<settings_all> {
                 ),
                 SizedBox(
                   height: 30,
+                ),
+                imageProfile(context,img),
+                SizedBox(
+                  height: 10,
                 ),
                 TextFormField(
                   controller: _ctrfname,
@@ -142,12 +170,49 @@ class _settings_allState extends State<settings_all> {
                     );
                   }).toList(),
                 ),
+                SizedBox(
+                  height: 30,
+                ),
+                TextFormField(
+                  controller: _ctrdate,
+                  decoration: textInputDecoration.copyWith(
+                      labelText: "enter date",
+                      prefix: Icon(
+                        Icons.calendar_today,
+                        color: Colors.indigo,
+                      )),
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: datee = DateTime.parse(_ctrdate.text),
+                        firstDate: DateTime(
+                            1950),
+                        lastDate: DateTime(2101));
+                    if (pickedDate != null) {
+                      print(pickedDate);
+                      DateTime formattedDate = new DateTime(
+                          pickedDate.year, pickedDate.month, pickedDate.day);
+                      print(formattedDate);
 
+                      setState(() {
+                       _ctrdate.text = DateFormat('yyyy-MM-dd').format(
+                            formattedDate);
 
+                      });
+                    } else {
+                      print("Date is not selected");
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 30,
+                ),
                 ElevatedButton(
-                  onPressed: (){
-                    settingsname(_ctrfname, _ctrlname, id);
-
+                  onPressed: () async {
+                    var test = await upload(_imgFile,id,'users');
+                    settingsname(_ctrfname, _ctrlname,gender,_ctrdate.text,test, id);
+                    //print(img);
                   },
                   child: Text('Validate'),
                   style: ElevatedButton.styleFrom(
@@ -166,5 +231,88 @@ class _settings_allState extends State<settings_all> {
       ),
     );
   }
+  Widget imageProfile(page,img) {
+    return Center(
+      child: Stack(children: <Widget>[
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage:  _imgFile == null
+              ? NetworkImage(img)
+              : FileImage(File(_imgFile.path)),
+          //NetworkImage(img),
+        ),
+        Positioned(
+          bottom: 20.0,
+          right: 20.0,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                  backgroundColor: kBackgroundColor,
+                  context: page,
+                  builder: ((builder) => bouttonimage(page))
+              );
+            },
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.teal,
+              size: 28.0,
+            ),
+          ),
+        )
+      ],),
+    );
+  }
 
+  bouttonimage(page) {
+    return Container(
+        color: kBackgroundColor,
+        height: 110.0,
+        width: MediaQuery
+            .of(page)
+            .size
+            .width,
+        margin: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 20,
+        ),
+        child: Column(
+          children: <Widget>[
+            Text("Choose profile photo",
+              style: TextStyle(
+                fontSize: 20.0,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                FlatButton.icon(
+                  icon: Icon(Icons.camera),
+                  onPressed: () {
+                    takephoto(ImageSource.camera);
+                  },
+                  label: Text("Camera"),
+                ),
+                FlatButton.icon(
+                  icon: Icon(Icons.image),
+                  onPressed: () {
+                    takephoto(ImageSource.gallery);
+                  },
+                  label: Text("gallery"),
+                ),
+              ],
+            ),
+          ],
+        )
+    );
+  }
+
+  void takephoto(ImageSource source) async {
+    final pickedFile = await _Picker.getImage(source: source);
+    setState(() {
+      _imgFile = pickedFile;
+    });
+  }
 }

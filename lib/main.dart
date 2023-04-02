@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
         '/home':(context) => Home(),
         '/profile_user':(context) => Profile_user(),
         '/settings_user_profile': (context) => settings_all(),
+        '/home_users': (context) => Home(),
       },
       debugShowCheckedModeBanner: false,
       home: Principal(),

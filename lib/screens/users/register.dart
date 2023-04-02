@@ -151,7 +151,7 @@ class _RegisterState extends State<Register> {
                         context: context,
                         initialDate: DateTime.now(),
                         firstDate: DateTime(
-                            1940),
+                            1950),
                         lastDate: DateTime(2101));
                     if (pickedDate != null) {
                       print(pickedDate);

@@ -113,11 +113,92 @@ Future<dynamic> imgprofile(String id) async {
   return Image.network(img);
 }
 //-----------------------------------------------------------------------------------------------
-settingsname(fn,ln,UID) async {
+settingsname(fn,ln,sexe,date,img,UID) async {
   final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
   docUser.update({
     'fname': fn.text,
     'lname': ln.text,
-
+    'Sexe': sexe,
+    'date': date,
+    'img': img
   });
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+  Future<void> addNewPublication(String pub, String id) async {
+    DocumentReference userRef =
+    FirebaseFirestore.instance.collection('users').doc(id);
+    Map<String, dynamic> newPublication = {
+      'date': Timestamp.now(),
+      'like': 0,
+      'dislike': 0,
+      'pub': pub,
+      'tab1': [],
+      'tab2': []
+    };
+    await userRef.update({
+      'publication': FieldValue.arrayUnion([newPublication])
+    });
+  }
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+void alertPub(thispage,id,erreur)
+{
+if(erreur == 'ok'){
+  Widget ok = TextButton(
+    child: Text("ok"),
+    onPressed: () {
+      Navigator.pushNamed(thispage, '/home_users',arguments: id);
+    },
+  );
+  AlertDialog alert = AlertDialog(
+    backgroundColor: kBackgroundColor,
+    title: Text("Alert!"),
+    content: Text("Your post is shared with your network"),
+    actions: [
+      ok,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: thispage,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+else{
+  Widget ok = TextButton(
+    child: Text("ok"),
+    onPressed: () {
+      Navigator.of(thispage).pop();
+    },
+  );
+  AlertDialog alert = AlertDialog(
+    backgroundColor: kBackgroundColor,
+    title: Text("Alert!"),
+    content: Text("try writing something to share with your network, you can't share an empty message."),
+    actions: [
+      ok,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: thispage,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+Future<void> addNewFriend(String newfriend, String id) async {
+  DocumentReference userRef =
+  FirebaseFirestore.instance.collection('users').doc(id);
+  await userRef.update({
+    'Amis': FieldValue.arrayUnion([newfriend])
+  });
+}
+
+
+
