@@ -235,7 +235,7 @@ class _Register_orgState extends State<Register_org> {
         await docUser.set(json);
         String loc = 'organisations';
         upload(_imgFile,UID,loc);
-        alertRegister(this.context,UID);
+        //alertRegister(this.context,UID);
 
 
       } catch (e) {

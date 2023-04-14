@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,11 +21,18 @@ class _settings_allState extends State<settings_all> {
   String id;
   String firstName = '';
   String lastName = '';
+  String p = '';
   String gender = '';
+  String email = '';
+  int numtel ;
   DateTime datee ;
   TextEditingController _ctrfname;
+  TextEditingController _ctremail;
   TextEditingController _ctrlname;
   TextEditingController _ctrdate;
+  TextEditingController _ctrnumtel;
+  TextEditingController _ctrmdp;
+
   PickedFile _imgFile;
   String img ="" ;
   final ImagePicker _Picker = ImagePicker();
@@ -33,39 +42,64 @@ class _settings_allState extends State<settings_all> {
     _ctrfname = TextEditingController();
     _ctrlname = TextEditingController();
     _ctrdate = TextEditingController();
+    _ctremail = TextEditingController();
+    _ctrnumtel =  TextEditingController();
+    _ctrmdp = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       id = ModalRoute.of(context).settings.arguments;
 
-      user_info(id, 'fname').then((value) {
+      userinfos(id, 'password').then((value) {
+        setState(() {
+          p = value;
+          _ctrmdp.text = p;
+        });
+      });
+
+
+      userinfos(id, 'firstName').then((value) {
         setState(() {
           firstName = value;
           _ctrfname.text = firstName;
         });
       });
 
-      user_info(id, 'lname').then((value) {
+      userinfos(id, 'lastName').then((value) {
         setState(() {
           lastName = value;
           _ctrlname.text = lastName;
         });
       });
-      user_info(id, 'Sexe').then((value) {
+
+      userinfos(id, 'sexe').then((value) {
         setState(() {
           gender = value;
         });
       });
-      user_info(id, 'date').then((value) {
+      userinfos(id, 'dnaissance').then((value) {
         setState(() {
           datee = DateTime.parse(value);
           _ctrdate.text = value;
         });
       });
-      user_info(id, 'img').then((value) {
+      userinfos(id, 'img').then((value) {
         setState(() {
-        img = value;
+          img = value;
+        });
+      });
+      userinfos(id, 'numtel').then((value) {
+        setState(() {
+          numtel = value;
+          _ctrnumtel.text = value.toString();
+        });
+      });
+      userinfos(id, 'email').then((value) {
+        setState(() {
+          email = value;
+          _ctremail.text = email ;
         });
       });
     });
+
   }
 
   @override
@@ -147,32 +181,30 @@ class _settings_allState extends State<settings_all> {
                 SizedBox(
                   height: 30,
                 ),
-                DropdownButton<String>(
-                  value: gender,
-                  icon: const Icon(Icons.arrow_downward),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: const TextStyle(color: Colors.deepPurple),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
+                TextFormField(
+                  controller: _ctremail,
+                  decoration: textInputDecoration.copyWith(
+                    labelText: "Email",
+                    prefix: Icon(
+                      Icons.account_circle_sharp,
+                      color: appbarBackgroundColor,
+                    ),
                   ),
-                  onChanged: (String newValue) {
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'please type your email !!';
+                    }
+                  },
+                  onChanged: (value) {
                     setState(() {
-                      gender = newValue;
+                      email = value;
                     });
                   },
-                  items: <String>['male', 'female']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
                 ),
                 SizedBox(
                   height: 30,
                 ),
+
                 TextFormField(
                   controller: _ctrdate,
                   decoration: textInputDecoration.copyWith(
@@ -193,10 +225,9 @@ class _settings_allState extends State<settings_all> {
                       print(pickedDate);
                       DateTime formattedDate = new DateTime(
                           pickedDate.year, pickedDate.month, pickedDate.day);
-                      print(formattedDate);
 
                       setState(() {
-                       _ctrdate.text = DateFormat('yyyy-MM-dd').format(
+                        _ctrdate.text = DateFormat('yyyy-MM-dd').format(
                             formattedDate);
 
                       });
@@ -208,11 +239,60 @@ class _settings_allState extends State<settings_all> {
                 SizedBox(
                   height: 30,
                 ),
+                TextFormField(
+                  controller: _ctrnumtel,
+                  decoration: textInputDecoration.copyWith(
+                    labelText: "Phone Number",
+                    prefix: Icon(
+                      Icons.account_circle_sharp,
+                      color: appbarBackgroundColor,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'please type your phone number !!';
+                    }
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      numtel =int.parse(value) ;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+
+                    Text('Sexe'),
+
+                    DropdownButton(
+                      elevation: 0,
+                      items: ['male', 'female']
+                          .map((e) =>
+                          DropdownMenuItem(
+                            child: Text('$e'),
+                            value: e,
+                          )).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          gender = val.toString();
+                        });
+                      },
+                      value: gender,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 30,
+                ),
                 ElevatedButton(
                   onPressed: () async {
-                    var test = await upload(_imgFile,id,'users');
-                    settingsname(_ctrfname, _ctrlname,gender,_ctrdate.text,test, id);
-                    //print(img);
+                    // upload(_imgFile,email,'users');
+                    putUser();
                   },
                   child: Text('Validate'),
                   style: ElevatedButton.styleFrom(
@@ -314,5 +394,31 @@ class _settings_allState extends State<settings_all> {
     setState(() {
       _imgFile = pickedFile;
     });
+  }
+  void putUser() async {
+
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      String loc ='users';
+      var img = await upload(_imgFile, email,loc);
+      upload(_imgFile,email,loc);
+      final uri = Uri.parse('http://192.168.1.12:8080/utilisateur');
+      var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
+
+          body:  jsonEncode( {
+            "id": 1,
+            "firstName": firstName,
+            "lastName": lastName,
+            "email": email,
+            "password": p,
+            "active": true,
+            "numtel": numtel ,
+            "sexe": "male",
+            "img": img,
+            "dnaissance": _ctrdate.text
+          })
+
+      );
+    }
   }
 }

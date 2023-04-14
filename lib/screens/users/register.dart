@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import '../../Widgets/contants.dart';
 import '../login.dart';
+
 class Register extends StatefulWidget {
   const Register({Key key}) : super(key: key);
 
@@ -23,6 +27,7 @@ class _RegisterState extends State<Register> {
   final _ctrdate = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   PickedFile _imgFile;
+  int numtel ;
   final ImagePicker _Picker = ImagePicker();
   String selectItem = 'male';
 
@@ -111,32 +116,7 @@ class _RegisterState extends State<Register> {
                 SizedBox(
                   height: 30,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
 
-                    Text('Sexe'),
-
-                    DropdownButton(
-                      elevation: 0,
-                      items: ['male', 'female']
-                          .map((e) =>
-                          DropdownMenuItem(
-                            child: Text('$e'),
-                            value: e,
-                          )).toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          selectItem = val.toString();
-                        });
-                      },
-                      value: selectItem,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 30,
-                ),
                 TextFormField(
                   controller: _ctrdate,
                   decoration: textInputDecoration.copyWith(
@@ -172,7 +152,51 @@ class _RegisterState extends State<Register> {
                 SizedBox(
                   height: 30,
                 ),
+                TextFormField(
+                  decoration: textInputDecoration.copyWith(
+                      labelText: "Phone Number",
+                      prefix: Icon(
+                        Icons.phone_android,
+                        color: Colors.indigo,
+                      )
+                  ),
+                  keyboardType: TextInputType.number, // Add this line to set input type as number
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please type your phone number!';
+                    }
+                  },
+                  onSaved: (value) => numtel = int.parse(value),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
 
+                    Text('Sexe'),
+
+                    DropdownButton(
+                      elevation: 0,
+                      items: ['male', 'female']
+                          .map((e) =>
+                          DropdownMenuItem(
+                            child: Text('$e'),
+                            value: e,
+                          )).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          selectItem = val.toString();
+                        });
+                      },
+                      value: selectItem,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 30,
+                ),
                 TextFormField(
                   decoration: textInputDecoration.copyWith(
                       labelText: "Password",
@@ -192,11 +216,15 @@ class _RegisterState extends State<Register> {
                   height: 20,
                 ),
                 ElevatedButton(
-                  onPressed: signup,
+                  onPressed:() {
+                    signup();
+                    alertRegister(context);
+
+                  } ,
                   child: Text('Sign up'),
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(170, 40),
-                    primary: Colors.indigo,
+                    primary:appbarBackgroundColor,
                     onPrimary: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
@@ -229,37 +257,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void signup() async {
 
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-
-      try {
-        var user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-
-        final currentUSER = FirebaseAuth.instance.currentUser;
-        final UID = currentUSER.uid; // id user
-        String loc ='users';
-        final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
-        var test = await upload(_imgFile,UID,loc);
-        final json = {
-          'fname': _ctrfname.text,
-          'lname': _ctrlname.text,
-          'date': _ctrdate.text,
-          'Sexe': selectItem,
-            'img':test,
-        };
-        await docUser.set(json);
-        upload(_imgFile,UID,loc);
-        alertRegister(this.context,UID);
-      } catch (e) {
-        print(e);
-      }
-    }
-  }
 
   Widget imageProfile(page) {
     return Center(
@@ -291,7 +289,33 @@ class _RegisterState extends State<Register> {
       ],),
     );
   }
+  void signup() async {
 
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      _password =  hashPassword(_password);
+      String loc ='users';
+      var img = await upload(_imgFile,_email,loc);
+      upload(_imgFile,_email,loc);
+      final uri = Uri.parse('http://192.168.1.12:8080/utilisateur');
+      var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
+
+
+          body:  jsonEncode({
+            "firstName": _ctrfname.text,
+            "lastName": _ctrlname.text,
+            "email":  _email,
+            "password":  _password,
+            "active": true,
+            "numtel": numtel,
+            "dnaissance": _ctrdate.text,
+            "sexe":selectItem,
+            "img": img
+          })
+
+      );
+    }
+  }
   bouttonimage(page) {
     return Container(
         color: kBackgroundColor,

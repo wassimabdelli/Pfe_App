@@ -167,13 +167,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_animations:
-    dependency: "direct main"
-    description:
-      name: flutter_animations
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.1+10"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -199,7 +192,7 @@ packages:
     source: sdk
     version: "0.0.0"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       url: "https://pub.dartlang.org"

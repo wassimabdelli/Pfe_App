@@ -14,6 +14,7 @@ class _Profile_userState extends State<Profile_user> {
   @override
   Widget build(BuildContext context) {
     String id = ModalRoute.of(context).settings.arguments;
+
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
@@ -33,30 +34,14 @@ class _Profile_userState extends State<Profile_user> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              FutureBuilder<dynamic>(
-                future: imgprofile(id),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(
-                            this.context, '/profile_user', arguments: id);
-                      },
-                      child: CircleAvatar(
-                        radius: 70,
-                        backgroundImage: snapshot.data.image,
-                      ),
-                    );
-                  }
-                },
-              ),
+              imgprofile(id),
               SizedBox(height: 10.0),
-              FutureBuilder<List<String>>(
-                future: Future.wait([user_info(id, 'lname'), user_info(id, 'fname')]),
+              FutureBuilder<List<dynamic>>(
+                future: Future.wait([userinfos(id, 'lastName'), userinfos(id, 'firstName')]),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    final lname = snapshot.data[0];
-                    final fname = snapshot.data[1];
+                    final lname = snapshot.data[0].toString();
+                    final fname = snapshot.data[1].toString();
                     return
                       Column(
                         children: [
@@ -90,22 +75,34 @@ class _Profile_userState extends State<Profile_user> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Email",
+                                "email",
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                FirebaseAuth.instance.currentUser.email,
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,                          ),
+                              FutureBuilder<dynamic>(
+                                future: userinfos(id,'email'),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Text(
+                                      snapshot.data.toString(),
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  }
+                                  // On peut retourner un widget de chargement ou un texte "Chargement en cours"
+                                  return CircularProgressIndicator();
+                                },
                               ),
                               IconButton(
                                 icon: Icon(Icons.email,color: appbarBackgroundColor,),
                               ),
+
                             ],
+
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,12 +114,12 @@ class _Profile_userState extends State<Profile_user> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              FutureBuilder<String>(
-                                future: user_info(id, 'date'),
+                              FutureBuilder<dynamic>(
+                                future: userinfos(id, 'dnaissance'),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     return Text(
-                                      snapshot.data,
+                                      snapshot.data.toString(),
                                       style: TextStyle(
                                         fontSize: 18.0,
                                         fontWeight: FontWeight.bold,),
@@ -147,21 +144,21 @@ class _Profile_userState extends State<Profile_user> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              FutureBuilder<String>(
-                                future: user_info(id, 'Sexe'),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return Text(
-                                      snapshot.data,
-                                      style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  }
-                                  // On peut retourner un widget de chargement ou un texte "Chargement en cours"
-                                  return CircularProgressIndicator();
-                                },
+                              FutureBuilder<dynamic>(
+                              future: userinfos(id,'sexe'),
+                              builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                              return Text(
+                              snapshot.data.toString(),
+                              style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              ),
+                              );
+                              }
+                              // On peut retourner un widget de chargement ou un texte "Chargement en cours"
+                              return CircularProgressIndicator();
+                              },
                               ),
                               IconButton(
                                 icon: Icon(Icons.male,color: appbarBackgroundColor,),
