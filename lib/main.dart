@@ -5,9 +5,10 @@ import 'package:rv_firebase/screens/principal.dart';
 import 'package:rv_firebase/screens/users/UserDetailsProfile.dart';
 import 'package:rv_firebase/screens/users/home_users.dart';
 import 'package:rv_firebase/screens/users/profile_users.dart';
+import 'package:rv_firebase/screens/users/settings_users/MyInvitations.dart';
 import 'package:rv_firebase/screens/users/settings_users/settings_all.dart';
 import 'package:rv_firebase/screens/users/test.dart';
-import 'package:rv_firebase/test.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/home_users': (context) => Home(),
         '/Detail_profil': (context) => UserDetaisProfile(),
         'login' : (context) => Login(),
+        '/invitatios': (context) => Invitations(),
       },
       debugShowCheckedModeBanner: false,
       home: Principal(),

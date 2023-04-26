@@ -258,6 +258,40 @@ imgprofile(id) {
         }
       });
 }
+imgprofile2(id) {
+  return FutureBuilder(
+      future: userinfos(id, "img"),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/profile_user', arguments: id);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(snapshot.data),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              width: 30.0,
+              height: 30.0,
+            ),
+          );
+        } else {
+          return Container(
+            width: 30.0,
+            height: 30.0,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          );
+        }
+      });
+}
+
 //------------------------------------------------------------------------------------------
 Future<List<Map<String, dynamic>>> RandomUser(id) async {
 
@@ -278,7 +312,205 @@ Future<List<dynamic>> listpub(String id) async {
   List<dynamic> users;
   final uri = Uri.parse('http://192.168.1.12:8080/publication/findbyIdUser/${id}');
   var res = await http.get(uri);
-  print(res.body);
  return  users = jsonDecode(res.body);
 }
-//*************************************
+//------------------------------------------------------------------------------------------------------------------------------------------------
+addReactLike(idUser,idPub,type) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/reaction');
+  var res = await http.post(uri,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode( {
+        "idPub": idPub,
+        "idUser": idUser,
+        "type":  type
+      }));
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+Future<String> verifReact( idUser,  idPub) async {
+  try {
+    final uri = Uri.parse(
+        'http://192.168.1.12:8080/reaction/findReact/${idUser}/${idPub}');
+    var res = await http.get(uri);
+
+    // Vérification de la réponse HTTP
+    if (res.statusCode == 200) {
+      var jsonResponse = jsonDecode(res.body);
+      var type = jsonResponse['type'];
+
+      // Vérification de la présence de la clé "type"
+      if (type != null) {
+        // Vérification de la valeur de "type"
+        if (type == 'Like') {
+          return 'Like';
+        } else if (type == 'Dislike') {
+          return 'Dislike';
+        } else {
+          return 'Erreur';
+        }
+      } else {
+        return 'Erreur';
+      }
+    }
+  } catch (e) {
+    // Gestion des erreurs
+   // print('Erreur lors de la requête HTTP ou du décodage JSON : $e');
+    return 'Erreur';
+  }
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+deleteReactLike(idUser,idPub)
+async {
+  final uri = Uri.parse('http://192.168.1.12:8080/reaction/${idUser}/${idPub}');
+  var res = await http.delete(uri);
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+Future<int> getIdREaction(idUser,idPub)
+async {
+
+  final uri = Uri.parse('http://192.168.1.12:8080/reaction/findReact/${idUser}/${idPub}');
+  var res = await http.get(uri);
+  var jsonResponse = jsonDecode(res.body);
+  var id = jsonResponse['id'];
+  return id;
+
+}
+PutReactLike(idR,idUser,idPub,type) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/reaction');
+  var res = await http.put(uri,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode( {
+        "id": idR,
+        "idPub": idPub,
+        "idUser": idUser,
+        "type": type
+      }));
+
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+getidR(idUser,idPub) async {
+  int idReaction = await getIdREaction(idUser, idPub);
+  return  idReaction;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+Future<int> CountLike(idPub)async {
+
+    final uri = Uri.parse('http://192.168.1.12:8080/reaction/countLike/${idPub}');
+    var res = await http.get(uri);
+    var nbLike = jsonDecode(res.body);
+    return nbLike;
+
+  }
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+  getNbLikes (idPub){
+  return  FutureBuilder<int>(
+    future: CountLike(idPub),
+    builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+      if (snapshot.hasData) {
+
+        return Text('${snapshot.data}') ;
+
+
+      }
+    },
+  );
+
+  }
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Future<int> CountDislike(idPub)async {
+
+  final uri = Uri.parse('http://192.168.1.12:8080/reaction/countDislike/${idPub}');
+  var res = await http.get(uri);
+  var nbLike = jsonDecode(res.body);
+  return nbLike;
+
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+getNbDislike (idPub){
+  return  FutureBuilder<int>(
+    future: CountDislike(idPub),
+    builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+      if (snapshot.hasData) {
+
+        return Text('${  snapshot.data}') ;
+
+
+      }
+    },
+  );
+
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+Future<List<dynamic>> getComments(idPub)async {
+
+  final uri = Uri.parse('http://192.168.1.12:8080/comment/${idPub}');
+  var res = await http.get(uri);
+  var Comments = jsonDecode(res.body);
+  return Comments;
+
+}
+//--------------------------------------------------------------------------------------------------------------------------
+Invitation(emutteur,destinataire) async{
+final uri = Uri.parse('http://192.168.1.12:8080/invitation');
+var res = await http.post(uri,
+headers: {
+'Content-Type': 'application/json'
+},
+body: jsonEncode( {
+  "emetteur": emutteur,
+  "destinataire": destinataire
+}));
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------
+Future<List<dynamic>> getInvitations(destinataire)async {
+  List<dynamic> Invitations;
+  final uri = Uri.parse('http://192.168.1.12:8080/invitation/${destinataire}');
+  var res = await http.get(uri);
+
+  return Invitations = jsonDecode(res.body);
+}
+//----------------------------------------------------------------------------------------------------------------------------
+DeleteInvit(id) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/invitation/${id}');
+  var res = await http.delete(uri);
+}
+//----------------------------------------------------------------------------------------------------------------------------
+  addAmis(id , idAmi ) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/amis');
+  var res = await http.post(uri,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(  {
+        "idCompte": id,
+        "idAmi": idAmi
+      }));
+
+}
+
+
+
+
+
+
+
+
+Future<List<dynamic>> listpub(String id) async {
+  List<dynamic> users;
+  List<dynamic> acceuil;
+
+
+
+
+  final uri = Uri.parse('http://192.168.1.12:8080/publication/findbyIdUser/${id}');
+  var res = await http.get(uri);
+  return  users = jsonDecode(res.body);
+}

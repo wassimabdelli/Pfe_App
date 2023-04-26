@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 
 class test extends StatefulWidget {
@@ -15,60 +16,35 @@ class test extends StatefulWidget {
 class _testState extends State<test> {
   @override
   Widget build(BuildContext context) {
-    String pub;
+
     return Scaffold(
-      body:
-      Column(
-        children: [
-          ElevatedButton(
-            onPressed: () async {
+      body: Center(
+        child: ElevatedButton(
+          child: Text('press') ,
+          onPressed: () async {
+            var d = 10 ;
+            final uri = Uri.parse('http://192.168.1.12:8080/invitation/${d}');
+            var res = await http.get(uri);
 
-              final uri = Uri.parse('http://192.168.1.12:8080/publication/findbyIdUser/10');
-              DateTime today = DateTime.now();
-              String formattedDate = DateFormat('yyyy-MM-dd').format(today);
-              var res = await http.get(uri);
-              List<dynamic> users = jsonDecode(res.body);
-              print(users[0]['contenu']);
-            //  for (var user in users) {
-                // Do something with each user object, e.g. print the user's name
-
-            //  }
-            },
-            child: Text('test'),
-          ),
-        ],
-      )
+            print('${res.body}');
 
 
-         ) ;
+          },
+        )
+      ),
 
-
-
+      );
   }
- Future signup() async {
-   final uri = Uri.parse('http://192.168.1.12:8080/utilisateur');
-   var res = await http.get(uri);
-   print(res.body);
-
-    /*
-    final uri = Uri.parse('http://192.168.1.12:8080/utilisateur');
- var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
-   body:  jsonEncode({
-     "firstName": "flutter",
-     "lastName": "flutter",
-     "email": "user@gmail.com",
-     "password": "user123",
-     "active": true,
-     "numtel": 264,
-     "dnaissance": "2023-04-11",
-     "amis": null
-   })
-
- );
- print(res.body);
-*/
-
-
-    }
-  }
-
+}
+/*
+TextFormField(
+                                                    decoration: textInputDecoration.copyWith(
+                                                      hintText: 'Add an comment here...',
+                                                    ),
+                                                    maxLines: 3,
+                                                    onChanged: (value) {
+                                                      MyComment = value;
+                                                    },
+                                                  ),
+                                                  SizedBox(height: 30),
+ */
