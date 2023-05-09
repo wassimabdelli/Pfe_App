@@ -153,7 +153,7 @@ class _InvitationsState extends State<Invitations> {
 
                                       Row(
                                       children: [
-                                      imgprofile(idEmutteur.toString()),
+                                      imgprofile(idEmutteur.toString(),id),
                                         SizedBox(width: 10),
                                         FutureBuilder<List<dynamic>>(
                                           future: Future.wait([

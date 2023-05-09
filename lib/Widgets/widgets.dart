@@ -104,6 +104,19 @@ upload(pathe, email, loc) async {
   return url;
 }
 //-----------------------------------------------------------------------------------------------
+uploadImgPub(pathe, email, loc) async {
+  var file = File(pathe.path);
+  var nimg = basename(
+      pathe.path); // pathe heya _imgFile /// basename yaatina path etasswira
+  String e = email;
+  var refstorage = FirebaseStorage.instance.ref(
+      "$loc/$e/ImgPub/$nimg"); // .ref("images") ==> ipmages sera un dossier dans storage
+  await refstorage.putFile(file);
+  var url = refstorage.getDownloadURL();
+  return url;
+}
+//-----------------------------------------------------------------------------------------------
+
 settingsname(fn, ln, sexe, date, img, UID) async {
   final docUser = FirebaseFirestore.instance.collection('users').doc(UID);
   docUser.update({
@@ -115,22 +128,26 @@ settingsname(fn, ln, sexe, date, img, UID) async {
   });
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
-addNewPublication(String pub, String iduser) async {
 
-  final uri = Uri.parse('http://192.168.1.12:8080/publicaton');
-  DateTime today = DateTime.now();
-  String formattedDate = DateFormat('dd/MM/yyyy').format(today);
-  var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+UpdatePublication(idPub, iduser,date,contenu) async {
+
+  final uri = Uri.parse('http://192.168.1.12:8080/publication');
+  var res = await http.put(uri, headers: {'Content-Type': 'application/json'},
       body:  jsonEncode( {
-        "idUser": "iduser",
-        "contenu": "pub",
-        "date_pub": "2023-05-05"
+        "id":idPub,
+        "idUser": iduser,
+        "contenu": contenu,
+        "date_pub":date
       })
 
   );
 }
+DeletePublication(idPub) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/publication/${idPub}');
+  var res = await http.delete(uri);
 
+}
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 void alertPub(thispage, id, erreur) {
   if (erreur == 'ok') {
@@ -184,39 +201,7 @@ void alertPub(thispage, id, erreur) {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-Future<void> addNewFriend(String newfriend, String id) async {
-  DocumentReference userRef =
-      FirebaseFirestore.instance.collection('users').doc(id);
-  await userRef.update({
-    'Amis': FieldValue.arrayUnion([newfriend])
-  });
-}
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Future<List<String>> getAmisIds(String id) async {
-  final currentUserSnapshot =
-      await FirebaseFirestore.instance.collection('users').doc(id).get();
-  final amisIds = List<String>.from(currentUserSnapshot.data()['Amis'] ?? []);
-
-  return amisIds;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
-Future<List<String>> getPublicationTexts(String id) async {
-  DocumentReference userRef =
-      FirebaseFirestore.instance.collection('users').doc(id);
-  DocumentSnapshot userSnapshot = await userRef.get();
-  if (userSnapshot.exists) {
-    List<dynamic> publications = userSnapshot.data()['publication'];
-    List<String> publicationTexts = publications
-        .map((publication) => publication['pub'].toString())
-        .toList();
-
-    return publicationTexts;
-  }
-}
-
-//------------------------------------------------------------------------------------------
 String hashPassword(String password) {
   String salt = "MyConstantSaltValue";
 
@@ -239,14 +224,14 @@ String hashPassword(String password) {
 }
 //------------------------------------------------------------------------------------------
 
-imgprofile(id) {
+imgprofile(id,MyId) {
   return FutureBuilder(
       future: userinfos(id, "img"),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/profile_user',arguments:id);
+              Navigator.pushNamed(context, '/profile_user',arguments:'$id;$MyId');
             },
             child: CircleAvatar(
               backgroundImage: NetworkImage(snapshot.data),
@@ -258,14 +243,33 @@ imgprofile(id) {
         }
       });
 }
-imgprofile2(id) {
+imgprofile0(id,a) {
   return FutureBuilder(
       future: userinfos(id, "img"),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, '/profile_user', arguments: id);
+            //  Navigator.pushNamed(context, '/profile_user',arguments:id);
+            },
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(snapshot.data),
+              radius: a,
+            ),
+          );
+        } else {
+          return CircleAvatar();
+        }
+      });
+}
+imgprofile2(id,MyId) {
+  return FutureBuilder(
+      future: userinfos(id, "img"),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/profile_user', arguments:'$id;$MyId');
             },
             child: Container(
               decoration: BoxDecoration(
@@ -291,7 +295,6 @@ imgprofile2(id) {
         }
       });
 }
-
 //------------------------------------------------------------------------------------------
 Future<List<Map<String, dynamic>>> RandomUser(id) async {
 
@@ -456,6 +459,7 @@ Future<List<dynamic>> getComments(idPub)async {
   return Comments;
 
 }
+
 //--------------------------------------------------------------------------------------------------------------------------
 Invitation(emutteur,destinataire) async{
 final uri = Uri.parse('http://192.168.1.12:8080/invitation');
@@ -495,22 +499,78 @@ DeleteInvit(id) async {
       }));
 
 }
-
-
-
-
-
-
-
-
-Future<List<dynamic>> listpub(String id) async {
-  List<dynamic> users;
-  List<dynamic> acceuil;
-
-
-
-
-  final uri = Uri.parse('http://192.168.1.12:8080/publication/findbyIdUser/${id}');
+Future<List<dynamic>> listAmi(String id) async {
+  List<dynamic> Amis;
+  final uri = Uri.parse('http://192.168.1.12:8080/amis/chercher/${id}');
   var res = await http.get(uri);
-  return  users = jsonDecode(res.body);
+  return  Amis = jsonDecode(res.body);
+}
+//----------------------------------------------------------------------------------------------------------------------------
+Future<List<dynamic>> listpub2(id) async {
+  List<dynamic> acceuil = [];
+  List<dynamic> Amis = await listAmi(id);
+
+  for (int i = 0; i < Amis.length; i++) {
+    List<dynamic> pub = await listpub(Amis[i].toString());
+    acceuil.addAll(pub);
+  }
+  acceuil.sort((a, b) => DateTime.parse(b['date_pub']).compareTo(DateTime.parse(a['date_pub'])));
+  return acceuil;
+}
+//----------------------------------------------------------------------------------------------------------------------------
+addComments(idPub,idUser,contenu) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/comment');
+  var res = await http.post(uri,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({
+          "idPub": idPub,
+          "idUser": idUser,
+          "date": DateTime.now().toString().substring(0, 10),
+          "contenu": contenu
+      }));
+}
+//-------------------------------------------------------------------------------------------------------------------------------
+UpdateComment(idComment,idPub,idUser,contenu)async
+{
+  final uri = Uri.parse('http://192.168.1.12:8080/comment');
+  var res = await http.put(uri,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({
+        "id": idComment,
+        "idPub": idPub,
+        "idUser": idUser,
+        "date": DateTime.now().toString().substring(0, 10),
+        "contenu": contenu
+      }));
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+DeleteComment(idComment) async {
+  final uri = Uri.parse('http://192.168.1.12:8080/comment/${idComment}');
+  var res = await http.delete(uri);
+}
+//------------------------------------------------------------------------------------------------------------------------------------
+Future<List<dynamic>>listFriend(String id) async {
+  List<dynamic> Amis;
+  final uri = Uri.parse('http://192.168.1.12:8080/amis/${id}');
+  var res = await http.get(uri);
+  return  Amis = jsonDecode(res.body);
+}
+
+Future<bool> VerifIsFriend(int id ,int idCompte) async {
+  List<dynamic> Amis;
+  final uri = Uri.parse('http://192.168.1.12:8080/amis/chercher/${id}');
+  var res = await http.get(uri);
+  Amis = jsonDecode(res.body);
+  return Amis.contains(idCompte);
+}
+conversation( id , idAmi ) async {
+  List<dynamic> Conversation;
+  final uri = Uri.parse('http://192.168.1.12:8080/amis/chercher/${id}');
+  var res = await http.get(uri);
+  Conversation = jsonDecode(res.body);
+  return Conversation = jsonDecode(res.body);
 }

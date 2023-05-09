@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import '../../Widgets/contants.dart';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class Home extends StatefulWidget {
   const Home({Key key}) : super(key: key);
@@ -15,10 +17,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  PickedFile _imgFile;
+  final ImagePicker _Picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     String id = ModalRoute.of(context).settings.arguments;
     String pub;
+    String Comment = '';
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: appbarBackgroundColor,
@@ -32,6 +38,22 @@ class _HomeState extends State<Home> {
             onPressed: () {},
           ),
           actions: <Widget>[
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, '/Messages',
+                    arguments: id
+                );
+              },
+              child: CircleAvatar(
+                backgroundColor: appbarBackgroundColor,
+                radius: 25.0,
+                child: Icon(
+                  Icons.message_outlined,
+                  color: Colors.white,
+                ),
+              ),
+            ),
             GestureDetector(
               onTap: () {
                 Navigator.pushNamed(
@@ -66,7 +88,13 @@ class _HomeState extends State<Home> {
                                 IconButton(
                                   icon: Icon(Icons.photo_library),
                                   color: appbarBackgroundColor,
-                                  onPressed: () async {},
+                                  onPressed: () async {
+                                    showModalBottomSheet(
+                                        backgroundColor: kBackgroundColor,
+                                        context: context,
+                                        builder: ((builder) => bouttonimage(context))
+                                    );
+                                  },
                                 ),
                                 SizedBox(width: 8.0),
                                 //Text('Ajouter une photo'),
@@ -79,7 +107,6 @@ class _HomeState extends State<Home> {
                               maxLines: 10,
                               onChanged: (value) {
                                 pub = value;
-                                //  print('Nouveau texte: $pub');
                               },
                             ),
                           ],
@@ -95,6 +122,9 @@ class _HomeState extends State<Home> {
                                 DateTime today = DateTime.now();
                                 String formattedDate =
                                     DateFormat('yyyy-MM-dd').format(today);
+                                var e = userinfos(id, 'email');
+                                uploadImgPub(_imgFile, e.toString(), "users");
+                                var img = await upload(_imgFile,e.toString(),"users");
                                 var res = await http.post(uri,
                                     headers: {
                                       'Content-Type': 'application/json'
@@ -102,9 +132,9 @@ class _HomeState extends State<Home> {
                                     body: jsonEncode({
                                       "idUser": id,
                                       "contenu": pub,
-                                      "date_pub": formattedDate
+                                      "date_pub": formattedDate,
+                                      "img_pub":img
                                     }));
-
                                 alertPub(context, id, erreur);
                               } else {
                                 var erreur;
@@ -136,7 +166,7 @@ class _HomeState extends State<Home> {
             SizedBox(
               width: 10,
             ),
-            imgprofile(id),
+            imgprofile(id,id),
             SizedBox(
               width: 5,
             ),
@@ -156,14 +186,9 @@ class _HomeState extends State<Home> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              // Premier conteneur avec son enfant (child) FutureBuilder
-
-
-              // Deuxième conteneur
                       SizedBox(height: 25),
               FutureBuilder<List<dynamic>>(
-                future: listpub(id),
+                future: listpub2(id),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<dynamic> publications = snapshot.data;
@@ -176,6 +201,8 @@ class _HomeState extends State<Home> {
                         itemBuilder: (context, index) {
                           String contenu = publications[index]['contenu'];
                           var idPub = publications[index]['id'];
+                          var auteur = publications[index]['idUser'];
+                          String UID = auteur.toString();
                           return  Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Container(
@@ -198,10 +225,10 @@ class _HomeState extends State<Home> {
                                 children: [
                                   Row(
                                     children: [
-                                      imgprofile2(id),
+                                      imgprofile2(UID,id),
                                       SizedBox(width: 10),
                                       FutureBuilder<List<dynamic>>(
-                                        future: Future.wait([userinfos(id, 'lastName'), userinfos(id, 'firstName')]),
+                                        future: Future.wait([userinfos(auteur, 'lastName'), userinfos(auteur, 'firstName')]),
                                         builder: (context, snapshot) {
                                           if (snapshot.hasData ) {
                                             return Text(
@@ -211,10 +238,11 @@ class _HomeState extends State<Home> {
                                                 fontWeight: FontWeight.bold,),
                                             );
                                           }
-                                          // On peut retourner un widget de chargement ou un texte "Chargement en cours"
                                           return Container(width: 0.0, height: 0.0);
                                         },
                                       ),
+
+
                                     ],
                                   ),
                                   SizedBox(height: 10),
@@ -327,7 +355,7 @@ class _HomeState extends State<Home> {
                                                                     children: [
                                                                       Row(
                                                                         children: [
-                                                                          imgprofile2(idAuteur),
+                                                                          imgprofile2(idAuteur,id),
                                                                           SizedBox(width: 10),
                                                                           FutureBuilder<List<dynamic>>(
                                                                             future: Future.wait([userinfos(idAuteur, 'lastName'), userinfos(idAuteur, 'firstName')]),
@@ -343,7 +371,8 @@ class _HomeState extends State<Home> {
                                                                               return Container(width: 0.0, height: 0.0);
                                                                             },
                                                                           ),
-                                                                        ],
+
+                                                                    ],
                                                                       ),
                                                                       SizedBox(height: 10),
                                                                       Text('${comments[index]['contenu']}'),
@@ -377,11 +406,30 @@ class _HomeState extends State<Home> {
                                                         suffixIcon: IconButton(
                                                           icon: Icon(Icons.send),
                                                           onPressed: () {
-
-                                                            print('Send button pressed!');
+                                                            addComments(idPub,id,Comment);
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) {
+                                                                return AlertDialog(
+                                                                  title: Text("Comment added"),
+                                                                  content: Text("Your comment has been added successfully."),
+                                                                  backgroundColor: kBackgroundColor,
+                                                                  actions: [
+                                                                    ElevatedButton(
+                                                                      child: Text("OK"),
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                      },
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
                                                           },
                                                         ),
+
                                                       ),
+                                                      onChanged: (value)=> Comment = value ,
                                                     ),
                                                   ),
 
@@ -432,5 +480,56 @@ class _HomeState extends State<Home> {
     );
 
   }
+  bouttonimage(page) {
+    return Container(
+        color: kBackgroundColor,
+        height: 110.0,
+        width: MediaQuery
+            .of(page)
+            .size
+            .width,
+        margin: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 20,
+        ),
+        child: Column(
+          children: <Widget>[
+            Text("Choose profile photo",
+              style: TextStyle(
+                fontSize: 20.0,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                FlatButton.icon(
+                  icon: Icon(Icons.camera),
+                  onPressed: () {
+                    takephoto(ImageSource.camera);
+                  },
+                  label: Text("Camera"),
+                ),
+                FlatButton.icon(
+                  icon: Icon(Icons.image),
+                  onPressed: () {
+                    takephoto(ImageSource.gallery);
+                  },
+                  label: Text("gallery"),
+                ),
+              ],
+            ),
+          ],
+        )
+    );
+  }
 
+  void takephoto(ImageSource source) async {
+    final pickedFile = await _Picker.getImage(source: source);
+    setState(() {
+      _imgFile = pickedFile;
+    });
+  }
 }

@@ -22,12 +22,8 @@ class _testState extends State<test> {
         child: ElevatedButton(
           child: Text('press') ,
           onPressed: () async {
-            var d = 10 ;
-            final uri = Uri.parse('http://192.168.1.12:8080/invitation/${d}');
-            var res = await http.get(uri);
-
-            print('${res.body}');
-
+            var test = await listpub2('1');
+            print('${test}');
 
           },
         )

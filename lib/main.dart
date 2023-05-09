@@ -2,10 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:rv_firebase/screens/login.dart';
 import 'package:rv_firebase/screens/principal.dart';
+import 'package:rv_firebase/screens/users/Messages.dart';
 import 'package:rv_firebase/screens/users/UserDetailsProfile.dart';
 import 'package:rv_firebase/screens/users/home_users.dart';
 import 'package:rv_firebase/screens/users/profile_users.dart';
+import 'package:rv_firebase/screens/users/settings_users/ListFriend.dart';
 import 'package:rv_firebase/screens/users/settings_users/MyInvitations.dart';
+import 'package:rv_firebase/screens/users/settings_users/SettingAcount.dart';
 import 'package:rv_firebase/screens/users/settings_users/settings_all.dart';
 import 'package:rv_firebase/screens/users/test.dart';
 
@@ -30,6 +33,10 @@ class MyApp extends StatelessWidget {
         '/Detail_profil': (context) => UserDetaisProfile(),
         'login' : (context) => Login(),
         '/invitatios': (context) => Invitations(),
+        '/SettingAcount': (context) => SettingAcount(),
+        '/ListFriend': (context) => ListFriend(),
+        '/Messages': (context) => Messages(),
+
       },
       debugShowCheckedModeBanner: false,
       home: Principal(),
