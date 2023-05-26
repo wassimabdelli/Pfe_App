@@ -32,8 +32,7 @@ class _PrincipalState extends State<Principal> {
               primary: Colors.black,
             ),
             onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Login()));
+               alertPrincipal2(context);
             },
 
           ),

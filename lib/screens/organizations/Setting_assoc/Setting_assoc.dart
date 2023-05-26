@@ -1,135 +1,185 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:rv_firebase/Widgets/contants.dart';
+import 'package:rv_firebase/Widgets/widgets.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:rv_firebase/Widgets/widgets.dart';
-import '../../Widgets/contants.dart';
-import '../login.dart';
-
-class Register extends StatefulWidget {
-  const Register({Key key}) : super(key: key);
+class setting_assoc extends StatefulWidget {
+  const setting_assoc({Key key}) : super(key: key);
 
   @override
-  State<Register> createState() => _RegisterState();
+  State<setting_assoc> createState() => _setting_assocState();
 }
 
-class _RegisterState extends State<Register> {
-  String _email, _password;
-  final _ctrfname = TextEditingController();
-  final _ctrlname = TextEditingController();
-  final _ctrdate = TextEditingController();
+class _setting_assocState extends State<setting_assoc> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  PickedFile _imgFile;
+  String id;
+  String name = '';
+  String p = '';
+  String category = '';
+  String email = '';
   int numtel ;
+  DateTime datee ;
+  TextEditingController _ctrname;
+  TextEditingController _ctremail;
+  TextEditingController _ctrdate;
+  TextEditingController _ctrnumtel;
+  TextEditingController _ctrmdp;
+  PickedFile _imgFile;
+  String img ="" ;
   final ImagePicker _Picker = ImagePicker();
-  String selectItem = 'male';
-
   @override
+  void initState() {
+    super.initState();
+    _ctrname = TextEditingController();
+    _ctrdate = TextEditingController();
+    _ctremail = TextEditingController();
+    _ctrnumtel =  TextEditingController();
+    _ctrmdp = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      id = ModalRoute.of(context).settings.arguments;
+
+      userinfos(id, 'password').then((value) {
+        setState(() {
+          p = value;
+          _ctrmdp.text = p;
+        });
+      });
+
+
+      Associnfos(id, 'name').then((value) {
+        setState(() {
+          name = value;
+          _ctrname.text = name;
+        });
+      });
+
+
+      Associnfos(id, 'categorie').then((value) {
+        setState(() {
+          category = value;
+        });
+      });
+      Associnfos(id, 'dateFondation').then((value) {
+        setState(() {
+          datee = DateTime.parse(value);
+          _ctrdate.text = value;
+        });
+      });
+      Associnfos(id, 'img').then((value) {
+        setState(() {
+          img = value;
+        });
+      });
+      Associnfos(id, 'numtel').then((value) {
+        setState(() {
+          numtel = value;
+          _ctrnumtel.text = value.toString();
+        });
+      });
+      Associnfos(id, 'email').then((value) {
+        setState(() {
+          email = value;
+          _ctremail.text = email ;
+        });
+      });
+    });
+
+  }
   Widget build(BuildContext context) {
+    List<String> result;
+    result = listseroulante(category);
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: appbarBackgroundColor,
-        elevation: 0.0,
-        title: Text(
-          'Sign up',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: Text('Let\'s change your informations '),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+          padding: const EdgeInsets.all(8.0),
           child: Form(
-            key: _formKey,
-            child: Column(
+          key: _formKey,
+          child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                const Text(
-                  "Holistic Winter ",
-                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                Container(
+                  margin: EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    '⛔ This form represents your informations, try to modify it then validate it',
+                  ),
                 ),
-                const Text(
-                  "Create your account now to chat and explore",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                ),
-                Image.asset("assets/login.png"),
-                imageProfile(context),
                 SizedBox(
-                  height: 5,
+                  height: 30,
+                ),
+                imageProfile(context,img),
+                SizedBox(
+                  height: 10,
                 ),
                 TextFormField(
+                  controller: _ctrname,
                   decoration: textInputDecoration.copyWith(
-                      labelText: "First Name",
-                      prefix: Icon(
-                        Icons.account_circle_sharp,
-                        color: Colors.indigo,
-                      )),
+                    labelText: "Name",
+                    prefix: Icon(
+                      Icons.account_circle_sharp,
+                      color: appbarBackgroundColor,
+                    ),
+                  ),
                   validator: (value) {
                     if (value.isEmpty) {
                       return 'please type your first name!!';
                     }
                   },
-                  onSaved: (value) => _ctrfname.text = value,
+                  onChanged: (value) {
+                    setState(() {
+                      name = value;
+                    });
+                  },
                 ),
                 SizedBox(
                   height: 30,
                 ),
                 TextFormField(
+                  controller: _ctremail,
                   decoration: textInputDecoration.copyWith(
-                      labelText: "Last Name",
-                      prefix: Icon(
-                        Icons.account_circle_sharp,
-                        color: Colors.indigo,
-                      )),
+                    labelText: "Email",
+                    prefix: Icon(
+                      Icons.email,
+                      color: appbarBackgroundColor,
+                    ),
+                  ),
                   validator: (value) {
                     if (value.isEmpty) {
-                      return 'please type your last name!!';
+                      return 'please type your email !!';
                     }
                   },
-                  onSaved: (value) => _ctrlname.text = value,
+                  onChanged: (value) {
+                    setState(() {
+                      email = value;
+                    });
+                  },
                 ),
                 SizedBox(
                   height: 30,
                 ),
-                TextFormField(
-                  decoration: textInputDecoration.copyWith(
-                      labelText: "Email",
-                      prefix: Icon(
-                        Icons.email,
-                        color: Colors.indigo,
-                      )),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'please type an email!!';
-                    }
-                  },
-                  onSaved: (value) => _email = value,
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-
                 TextFormField(
                   controller: _ctrdate,
                   decoration: textInputDecoration.copyWith(
                       labelText: "enter date",
                       prefix: Icon(
                         Icons.calendar_today,
-                        color: Colors.indigo,
+                        color: appbarBackgroundColor,
                       )),
                   readOnly: true,
                   onTap: () async {
                     DateTime pickedDate = await showDatePicker(
                         context: context,
-                        initialDate: DateTime.now(),
+                        initialDate: datee = DateTime.parse(_ctrdate.text),
                         firstDate: DateTime(
                             1950),
                         lastDate: DateTime(2101));
@@ -137,36 +187,40 @@ class _RegisterState extends State<Register> {
                       print(pickedDate);
                       DateTime formattedDate = new DateTime(
                           pickedDate.year, pickedDate.month, pickedDate.day);
-                      print(formattedDate);
 
                       setState(() {
                         _ctrdate.text = DateFormat('yyyy-MM-dd').format(
                             formattedDate);
+
                       });
                     } else {
                       print("Date is not selected");
                     }
                   },
                 ),
-
                 SizedBox(
                   height: 30,
                 ),
                 TextFormField(
+                  controller: _ctrnumtel,
                   decoration: textInputDecoration.copyWith(
-                      labelText: "Phone Number",
-                      prefix: Icon(
-                        Icons.phone_android,
-                        color: Colors.indigo,
-                      )
+                    labelText: "Phone Number",
+                    prefix: Icon(
+                      Icons.account_circle_sharp,
+                      color: appbarBackgroundColor,
+                    ),
                   ),
-                  keyboardType: TextInputType.number, // Add this line to set input type as number
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value.isEmpty) {
-                      return 'Please type your phone number!';
+                      return 'please type your phone number !!';
                     }
                   },
-                  onSaved: (value) => numtel = int.parse(value),
+                  onChanged: (value) {
+                    setState(() {
+                      numtel =int.parse(value) ;
+                    });
+                  },
                 ),
                 SizedBox(
                   height: 30,
@@ -175,11 +229,13 @@ class _RegisterState extends State<Register> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
 
-                    Text('Sexe'),
-
+                    Text('Category :'),
+                    SizedBox(
+                      width: 15,
+                    ),
                     DropdownButton(
                       elevation: 0,
-                      items: ['male', 'female']
+                      items:result
                           .map((e) =>
                           DropdownMenuItem(
                             child: Text('$e'),
@@ -187,86 +243,77 @@ class _RegisterState extends State<Register> {
                           )).toList(),
                       onChanged: (val) {
                         setState(() {
-                          selectItem = val.toString();
+                          category = val.toString();
                         });
                       },
-                      value: selectItem,
+                      value: category,
                     ),
                   ],
                 ),
                 SizedBox(
                   height: 30,
                 ),
-                TextFormField(
-                  decoration: textInputDecoration.copyWith(
-                      labelText: "Password",
-                      prefix: Icon(
-                        Icons.lock,
-                        color: Colors.indigo,
-                      )),
-                  validator: (value) {
-                    if (value.length < 6) {
-                      return 'your password needs to be atleast 6 characters';
-                    }
-                  },
-                  onSaved: (value) => _password = value,
-                  obscureText: true,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
                 ElevatedButton(
-                  onPressed:() {
-                    signup();
-                    alertRegister(context);
-
-                  } ,
-                  child: Text('Sign up'),
+                  onPressed: () async {
+                    // upload(_imgFile,email,'users');
+                    putAssoc();
+                  },
+                  child: Text('Validate'),
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(170, 40),
-                    primary:appbarBackgroundColor,
+                    primary:appbarBackgroundColor ,
                     onPrimary: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text.rich(TextSpan(
-                  text: "you already have an account ?",
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                  children: <TextSpan>[
-                    TextSpan(
-                        text: "Log in here",
-                        style: const TextStyle(
-                            color: Colors.black,
-                            decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            nextScreen(context, const Login());
-                          }),
-                  ],
-                )),
-              ],
-            ),
-          ),
+              ]
+          )
+          )
         ),
       ),
     );
   }
+  void putAssoc() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
 
+      if ( _imgFile != null )
+        {
+          var img = await upload(_imgFile, email,'Association');
+          upload(_imgFile,email,'Association');
+          print('ici');
+        }
+      final uri = Uri.parse('http://$localhost:8080/association');
+      var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
 
+          body:  jsonEncode( {
+            "id": id,
+            "name": name,
+            "email": email,
+            "password": p,
+            "numtel": numtel,
+            "categorie": category,
+            "img": img,
+            "dateFondation":  _ctrdate.text
+          })
 
-  Widget imageProfile(page) {
+      );
+    }
+    Navigator.pushNamed(this.context,
+        '/InfosAssoc',
+        arguments: id);
+  }
+  Widget imageProfile(page,img) {
     return Center(
       child: Stack(children: <Widget>[
         CircleAvatar(
           radius: 80.0,
-          backgroundImage: _imgFile == null
-              ? AssetImage("assets/avatar.png")
+          backgroundImage:  _imgFile == null
+              ? NetworkImage(img)
               : FileImage(File(_imgFile.path)),
+          //NetworkImage(img),
         ),
         Positioned(
           bottom: 20.0,
@@ -289,33 +336,7 @@ class _RegisterState extends State<Register> {
       ],),
     );
   }
-  void signup() async {
 
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      _password =  hashPassword(_password);
-      String loc ='users';
-      var img = await upload(_imgFile,_email,loc);
-      upload(_imgFile,_email,loc);
-      final uri = Uri.parse('http://192.168.1.55:8080/utilisateur');
-      var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
-
-
-          body:  jsonEncode({
-            "firstName": _ctrfname.text,
-            "lastName": _ctrlname.text,
-            "email":  _email,
-            "password":  _password,
-            "active": true,
-            "numtel": numtel,
-            "dnaissance": _ctrdate.text,
-            "sexe":selectItem,
-            "img": img
-          })
-
-      );
-    }
-  }
   bouttonimage(page) {
     return Container(
         color: kBackgroundColor,

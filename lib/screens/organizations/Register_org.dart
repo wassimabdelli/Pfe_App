@@ -1,5 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,7 @@ import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import 'dart:io';
 import '../login.dart';
-
+import 'package:http/http.dart' as http;
 class Register_org extends StatefulWidget {
   const Register_org({Key key}) : super(key: key);
 
@@ -24,14 +23,15 @@ class _Register_orgState extends State<Register_org> {
   final ImagePicker _Picker = ImagePicker();
   final _ctrname = TextEditingController();
   final _ctrdate = TextEditingController();
-  final _ctr = TextEditingController();
+  //final _ctr = TextEditingController();
   String categorie = 'select your categorie';
+  int numtel ;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
+        backgroundColor: appbarBackgroundColor,
         elevation: 0.0,
         title: Text(
           'Organization space',
@@ -62,7 +62,7 @@ class _Register_orgState extends State<Register_org> {
             ),
             TextFormField(
               decoration: textInputDecoration.copyWith(
-                  labelText: "First Name",
+                  labelText: "Name",
                   prefix: Icon(
                     Icons.account_circle_sharp,
                     color: Colors.indigo,
@@ -129,15 +129,38 @@ class _Register_orgState extends State<Register_org> {
             SizedBox(
               height: 30,
             ),
+            TextFormField(
+              decoration: textInputDecoration.copyWith(
+                  labelText: "Phone Number",
+                  prefix: Icon(
+                    Icons.phone_android,
+                    color: Colors.indigo,
+                  )
+              ),
+              keyboardType: TextInputType.number, // Add this line to set input type as number
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Please type your phone number!';
+                }
+              },
+              onSaved: (value) => numtel = int.parse(value),
+            ),
+            SizedBox(
+              height: 30,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
 
-                Text('SEXE'),
-
+                Text('Category :'),
+                SizedBox(
+                  width: 15,
+                ),
                 DropdownButton(
                   elevation: 0,
-                  items: ['select your categorie','cat1', 'cat2']
+                  items: ['select your categorie','Associations culturelles', 'Associations sportives','Associations professionnelles',
+                    'Associations de protection des droits ','Associations de volontariat','Associations d\'éducation',
+                    'Associations de santé','Associations politiques']
                       .map((e) =>
                       DropdownMenuItem(
                         child: Text('$e'),
@@ -175,11 +198,16 @@ class _Register_orgState extends State<Register_org> {
               height: 20,
             ),
             ElevatedButton(
-              onPressed: signup,
+              onPressed:() {
+                signup();
+                //alertRegister(context);
+                print("object");
+
+              } ,
               child: Text('Sign up'),
               style: ElevatedButton.styleFrom(
                 fixedSize: Size(170, 40),
-                primary: Colors.indigo,
+                primary:appbarBackgroundColor,
                 onPrimary: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
@@ -217,30 +245,25 @@ class _Register_orgState extends State<Register_org> {
 
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-
-      try {
-        var user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-        final currentUSER = FirebaseAuth.instance.currentUser;
-
-        final UID = currentUSER.uid; // id user
-        final docUser = FirebaseFirestore.instance.collection('organisation').doc(UID);
-        final json = {
-          'name': _ctrname.text,
-          'date': _ctrdate.text,
-          'categorie': categorie,
-        };
-        await docUser.set(json);
-        String loc = 'organisations';
-        upload(_imgFile,UID,loc);
-        //alertRegister(this.context,UID);
+      _password =  hashPassword(_password);
+      String loc ='Association';
+      var img = await upload(_imgFile,_email,loc);
+      upload(_imgFile,_email,loc);
+      final uri = Uri.parse('http://$localhost:8080/association');
+      var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
 
 
-      } catch (e) {
-        print(e);
-      }
+          body:  jsonEncode({
+            "name": _ctrname.text,
+            "email": _email,
+            "password":_password,
+            "numtel":   numtel,
+            "categorie": categorie,
+            "img": img,
+            "dateFondation":_ctrdate.text,
+          })
+
+      );
     }
   }
   Widget imageProfile(page) {

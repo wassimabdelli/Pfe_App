@@ -1,22 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
-import 'package:rv_firebase/screens/users/home_users.dart';
-import 'package:rv_firebase/screens/users/register.dart';
 import 'package:rv_firebase/screens/users/register.dart';
 import 'package:http/http.dart' as http;
-import '../Widgets/contants.dart';
-
-class Login extends StatefulWidget {
-  const Login({Key key}) : super(key: key);
+class Login_assoc extends StatefulWidget {
+  const Login_assoc({Key key}) : super(key: key);
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Login_assoc> createState() => _Login_assocState();
 }
 
-class _LoginState extends State<Login> {
+class _Login_assocState extends State<Login_assoc> {
   String _email, _password;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -27,20 +23,19 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         backgroundColor: appbarBackgroundColor,
         elevation: 5,
-        title: Text('Sign in',
+        title: Text('Association space',
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body:
-      SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+          padding: const EdgeInsets.symmetric(horizontal: 20 , vertical: 80),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
+              children: [
                 const Text(
                   "Holistic Winter ",
                   style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
@@ -87,7 +82,7 @@ class _LoginState extends State<Login> {
                   height: 20,
                 ),
                 ElevatedButton(
-                  onPressed: (){ sign();},
+                 onPressed: (){ sign();},
                   child: Text('Sign in'),
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(170, 40),
@@ -118,6 +113,7 @@ class _LoginState extends State<Login> {
                       ],
                     )
                 ),
+
               ],
             ),
           ),
@@ -128,9 +124,9 @@ class _LoginState extends State<Login> {
   void sign() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      var test =  hashPassword(_password);
+    //  var test =  hashPassword(_password);
       final uri = Uri.parse(
-          'http://$localhost:8080/utilisateur/login/$_email/$test');
+          'http://$localhost:8080/association/login/$_email/$_password');
       var res = await http.get(uri);
       if (res.statusCode == 500)
       {
@@ -142,7 +138,7 @@ class _LoginState extends State<Login> {
       }else {
 
         var UID = res.body;
-        Navigator.pushNamed(context, '/home',arguments: UID);
+       Navigator.pushNamed(context, '/home_assoc',arguments: UID);
 
 
       }

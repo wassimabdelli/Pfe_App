@@ -11,15 +11,17 @@ class Messages extends StatefulWidget {
 }
 
 class _MessagesState extends State<Messages> {
-  bool messageClicked = false ;
+  int messageClicked = 0 ;
     int MyId;
   int idM;
   @override
   Widget build(BuildContext context) {
-
-    String id = ModalRoute.of(context).settings.arguments;
+    String msg = '';
+     String arguments = ModalRoute.of(context).settings.arguments;
+     List<String> values = arguments.split(';');
+     String id = values[0];
+      int m = int.parse(values[1]);
     List<Map<String, dynamic>> usersList = [];
-
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar:  AppBar(
@@ -28,10 +30,14 @@ class _MessagesState extends State<Messages> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () =>  Navigator.pushNamed(
+              context,'/home_users',
+              arguments: id
+          ),
         ),
       ),
-      body: Column(
+      body:
+      ListView(
         children: [
           Column(
             children: [
@@ -106,10 +112,9 @@ class _MessagesState extends State<Messages> {
                                       icon: Icon(Icons.message),
                                       onPressed: () {
                                         setState(() {
-                                          messageClicked = true;
+                                          messageClicked = idAmi;
                                           MyId = int.parse(id);
                                           idM = idAmi;
-                                          print(messageClicked);
                                         });
                                       },
                                       color: appbarBackgroundColor,
@@ -128,29 +133,274 @@ class _MessagesState extends State<Messages> {
                 },
               ),
               SizedBox(height: 16.0),
-              Container(
-                child:
-                FutureBuilder<String>(
-                  //future:messageClicked,
-                  builder: (context, snapshot) {
-                    if (messageClicked ) {
-                    return FutureBuilder(
-                          future: conversation(id, idM),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Text("$idM");
-                            } else {
-                              return Container(width: 0.0, height: 0.0);
-                            }
-                          }
-                      );
-                    }else{
-                      return Container(width: 0.0, height: 0.0);
-                    }
-                  }
-                )
+                Container(
+                  child:
+                  FutureBuilder<String>(
+                    builder: (context, snapshot) {
+                      if (messageClicked != 0 ) {
+                      return Column(
+                        children: [
+                          Container(
+                            width: 450,
+                            height: 300,
+                              child: FutureBuilder(
+                                    future: conversation(MyId, messageClicked,"user"),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return ListView.builder(
+                                          scrollDirection: Axis.vertical,
+                                          itemCount: snapshot.data.length,
+                                          itemBuilder: (context, index) {
+                                            if (snapshot.data[index]['typeD'] ==
+                                                "user" &&
+                                                snapshot.data[index]['typeE'] ==
+                                                    "user") {
+                                              return Column(
+                                                children: [
+                                                  Container(
+                                                    margin: EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 10),
+                                                    child: Row(
+                                                      mainAxisAlignment: snapshot
+                                                          .data[index]['emetteur'] ==
+                                                          MyId
+                                                          ? MainAxisAlignment
+                                                          .end
+                                                          : MainAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 15,
+                                                              vertical: 10),
+                                                          decoration: BoxDecoration(
+                                                            color: snapshot
+                                                                .data[index]['emetteur'] ==
+                                                                MyId
+                                                                ? Colors.blue
+                                                                : Colors
+                                                                .grey[500],
+                                                            borderRadius: BorderRadius
+                                                                .circular(20),
+                                                          ),
+                                                          child: Text(
+                                                            snapshot
+                                                                .data[index]['message'],
+                                                            style: TextStyle(
+                                                              color: snapshot
+                                                                  .data[index]['emetteur'] ==
+                                                                  MyId
+                                                                  ? Colors.white
+                                                                  : Colors
+                                                                  .black,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        FutureBuilder(
+                                                          future: userinfos(
+                                                              snapshot
+                                                                  .data[index]['emetteur'],
+                                                              'img'),
+                                                          builder: (context,
+                                                              snapshot) {
+                                                            if (snapshot
+                                                                .hasData) {
+                                                              String img = snapshot
+                                                                  .data;
+                                                              return GestureDetector(
+                                                                onTap: () {
+                                                                  // Navigator.pushNamed(context, '/profile_user', arguments: idp.toString());
+                                                                },
+                                                                child: CircleAvatar(
+                                                                  radius: 15,
+                                                                  backgroundImage: NetworkImage(
+                                                                      img),
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              return CircularProgressIndicator();
+                                                            }
+                                                          },
+                                                        ),
 
-              ),
+                                                      ],
+                                                    ),
+
+                                                  ),
+
+                                                ],
+                                              );
+                                            }
+                                          }
+                                      );
+
+                                    } else {
+                                      return Container(width: 0.0, height: 0.0);// a changer
+                                    }
+                                  }
+                              ),
+                          ),
+                          TextField(
+                            onChanged: (value) {
+                               msg = value;
+                            },
+                            decoration:
+                            InputDecoration(
+                              hintText:
+                              'Add your msg',
+                              focusedBorder:
+                              OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                    appbarBackgroundColor),
+                              ),
+                              suffixIcon: IconButton(
+                                icon:
+                                Icon(Icons.send),
+                                onPressed: () {
+                                      addMesg(MyId,idM,msg,"user","user");
+                                  Navigator.pushNamed(
+                                      context,'/Messages',
+                                      arguments: '$id;$idM'
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      );
+                      }else{
+                        return Column(
+                          children: [
+                            Container(
+                              width: 450,
+                              height: 300,
+                              child: FutureBuilder(
+                                  future: conversation(id, m,"user"),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return ListView.builder(
+                                          scrollDirection: Axis.vertical,
+                                          itemCount: snapshot.data.length,
+                                          itemBuilder: (context, index) {
+                                          if (snapshot.data[index]['typeD'] ==
+                                          "user" &&
+                                          snapshot.data[index]['typeE'] ==
+                                          "user") {
+                                            return
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    vertical: 10),
+                                                child: Row(
+                                                  mainAxisAlignment: snapshot
+                                                      .data[index]['emetteur'] ==
+                                                      int.parse(id)
+                                                      ? MainAxisAlignment.end
+                                                      : MainAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      padding: EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 15,
+                                                          vertical: 10),
+                                                      decoration: BoxDecoration(
+                                                        color: snapshot
+                                                            .data[index]['emetteur'] ==
+                                                            int.parse(id)
+                                                            ? Colors.blue
+                                                            : Colors.grey[500],
+                                                        borderRadius: BorderRadius
+                                                            .circular(20),
+                                                      ),
+                                                      child: Text(
+                                                        snapshot
+                                                            .data[index]['message'],
+                                                        style: TextStyle(
+                                                          color: snapshot
+                                                              .data[index]['emetteur'] ==
+                                                              int.parse(id)
+                                                              ? Colors.white
+                                                              : Colors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    FutureBuilder(
+                                                      future: userinfos(snapshot
+                                                          .data[index]['emetteur'],
+                                                          'img'),
+                                                      builder: (context,
+                                                          snapshot) {
+                                                        if (snapshot.hasData) {
+                                                          String img = snapshot
+                                                              .data;
+                                                          return GestureDetector(
+                                                            onTap: () {
+                                                              // Navigator.pushNamed(context, '/profile_user', arguments: idp.toString());
+                                                            },
+                                                            child: CircleAvatar(
+                                                              radius: 15,
+                                                              backgroundImage: NetworkImage(
+                                                                  img),
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          return CircularProgressIndicator();
+                                                        }
+                                                      },
+                                                    ),
+
+                                                  ],
+                                                ),
+
+                                              );
+                                          }
+                                          }
+                                      );
+                                    } else {
+                                      return Container(width: 0.0, height: 0.0);
+                                    }
+                                  }
+                              ),
+                            ),
+                            TextField(
+                              onChanged: (value) {
+                                msg = value;
+                              },
+                              decoration:
+                              InputDecoration(
+                                hintText:
+                                'Add your msg',
+                                focusedBorder:
+                                OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color:
+                                      appbarBackgroundColor),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon:
+                                  Icon(Icons.send),
+                                  onPressed: () {
+                                    setState(() {
+                                      MyId = int.parse(id);
+                                    });
+                                    addMesg(MyId,m,msg,"user","user");
+                                    Navigator.pushNamed(
+                                        context,'/Messages',
+                                        arguments:  '$MyId;$m'
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                    }
+                  )
+
+                ),
             ],
           ),
     ]
@@ -159,4 +409,5 @@ class _MessagesState extends State<Messages> {
 
     );
   }
+
 }

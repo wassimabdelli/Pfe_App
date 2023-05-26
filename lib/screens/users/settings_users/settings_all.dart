@@ -32,7 +32,6 @@ class _settings_allState extends State<settings_all> {
   TextEditingController _ctrdate;
   TextEditingController _ctrnumtel;
   TextEditingController _ctrmdp;
-
   PickedFile _imgFile;
   String img ="" ;
   final ImagePicker _Picker = ImagePicker();
@@ -111,7 +110,7 @@ class _settings_allState extends State<settings_all> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: appbarBackgroundColor,
-        title: Text('Let\'s change your Name'),
+        title: Text('Let\'s change your informations'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -125,7 +124,7 @@ class _settings_allState extends State<settings_all> {
                 Container(
                   margin: EdgeInsets.only(top: 16.0),
                   child: Text(
-                    '⛔ This form represents your first and last name, try to modify it then validate it',
+                    '⛔ This form represents your informations, try to modify it then validate it',
                   ),
                 ),
                 SizedBox(
@@ -186,7 +185,7 @@ class _settings_allState extends State<settings_all> {
                   decoration: textInputDecoration.copyWith(
                     labelText: "Email",
                     prefix: Icon(
-                      Icons.account_circle_sharp,
+                      Icons.email,
                       color: appbarBackgroundColor,
                     ),
                   ),
@@ -402,7 +401,7 @@ class _settings_allState extends State<settings_all> {
       String loc ='users';
       var img = await upload(_imgFile, email,loc);
       upload(_imgFile,email,loc);
-      final uri = Uri.parse('http://192.168.1.12:8080/utilisateur');
+      final uri = Uri.parse('http://$localhost:8080/utilisateur');
       var res = await http.post(uri, headers: {'Content-Type': 'application/json'},
 
           body:  jsonEncode( {

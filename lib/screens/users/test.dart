@@ -22,25 +22,14 @@ class _testState extends State<test> {
         child: ElevatedButton(
           child: Text('press') ,
           onPressed: () async {
-            var test = await listpub2('1');
-            print('${test}');
-
+            acceuilUSer(1,"user");
           },
+
+
         )
       ),
 
       );
   }
+
 }
-/*
-TextFormField(
-                                                    decoration: textInputDecoration.copyWith(
-                                                      hintText: 'Add an comment here...',
-                                                    ),
-                                                    maxLines: 3,
-                                                    onChanged: (value) {
-                                                      MyComment = value;
-                                                    },
-                                                  ),
-                                                  SizedBox(height: 30),
- */

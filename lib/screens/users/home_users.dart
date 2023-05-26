@@ -24,7 +24,7 @@ class _HomeState extends State<Home> {
     String id = ModalRoute.of(context).settings.arguments;
     String pub;
     String Comment = '';
-
+    int m = 0;
     return Scaffold(
         appBar: AppBar(
           backgroundColor: appbarBackgroundColor,
@@ -41,9 +41,88 @@ class _HomeState extends State<Home> {
             GestureDetector(
               onTap: () {
                 Navigator.pushNamed(
-                    context, '/Messages',
-                    arguments: id
+                    context,'/ListChallenges',
+                    arguments:id
                 );
+              },
+              child: Icon(
+                Icons.star,
+                size: 32.0,
+                color: Colors.white,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+
+                      final RenderBox button =
+                      context.findRenderObject();
+                      final RenderBox overlay =
+                      Overlay.of(context)
+                          .context
+                          .findRenderObject();
+                      final RelativeRect position =
+                      RelativeRect.fromRect(
+                      Rect.fromPoints(
+                      button.localToGlobal(
+                      Offset.zero,
+                      ancestor: overlay),
+                      button.localToGlobal(
+                      button.size.bottomRight(
+                      Offset.zero),
+                      ancestor: overlay),
+                      ),
+                      Offset.zero & overlay.size,
+                      );
+                      showMenu(
+                      context: context,
+                      position: position,
+                      items: <
+                      PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                      value: 'association',
+                      child: Row(
+                      children: [
+                      Icon(
+                      Icons.domain,
+                      color: Colors.green,
+                      ),
+                      SizedBox(
+                      width: 5,
+                      ),
+                      Text('Association'),
+                      ],
+                      ),
+                      ),
+                      PopupMenuItem<String>(
+                      value: 'friends',
+                      child: Row(
+                      children: [
+                      Icon(
+                      Icons.group,
+                      color: Colors.red,
+                      ),
+                      SizedBox(
+                      width: 5,
+                      ),
+                      Text('Friends'),
+                      ],
+                      ),
+                      ),
+                      ],
+                      color: kBackgroundColor,
+                      ).then((value) {
+                      if (value == 'association') {
+                        Navigator.pushNamed(
+                            context,'/MsgWithAssoc',
+                            arguments: '$id;$m'
+                        );
+                      } else {
+                         Navigator.pushNamed(
+                    context,'/Messages',
+                    arguments: '$id;$m'
+                );
+                      }
+                      });
               },
               child: CircleAvatar(
                 backgroundColor: appbarBackgroundColor,
@@ -118,7 +197,7 @@ class _HomeState extends State<Home> {
                               if (pub != null) {
                                 var erreur = 'ok';
                                 final uri = Uri.parse(
-                                    'http://192.168.1.12:8080/publication');
+                                    'http://$localhost:8080/publication');
                                 DateTime today = DateTime.now();
                                 String formattedDate =
                                     DateFormat('yyyy-MM-dd').format(today);
@@ -173,309 +252,891 @@ class _HomeState extends State<Home> {
           ],
         ),
         backgroundColor: kBackgroundColor,
-        body: Container(
-            padding: EdgeInsets.all(16.0),
-            child:
-                Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-              Text(
-                'What\'s new',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-                      SizedBox(height: 25),
-              FutureBuilder<List<dynamic>>(
-                future: listpub2(id),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    List<dynamic> publications = snapshot.data;
-
-                    return Container(
-                      height: 655,
-                      child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        itemCount: publications.length,
-                        itemBuilder: (context, index) {
-                          String contenu = publications[index]['contenu'];
-                          var idPub = publications[index]['id'];
-                          var auteur = publications[index]['idUser'];
-                          String UID = auteur.toString();
-                          return  Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
+        body: SingleChildScrollView(
+          child: Container(
+              padding: EdgeInsets.all(16.0),
+              child:
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'What\'s new',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      imgprofile2(UID,id),
-                                      SizedBox(width: 10),
-                                      FutureBuilder<List<dynamic>>(
-                                        future: Future.wait([userinfos(auteur, 'lastName'), userinfos(auteur, 'firstName')]),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.hasData ) {
-                                            return Text(
-                                              snapshot.data[1].toString() +" "+ snapshot.data[0].toString() ,
-                                              style: TextStyle(
-                                                fontSize: 18.0,
-                                                fontWeight: FontWeight.bold,),
-                                            );
-                                          }
-                                          return Container(width: 0.0, height: 0.0);
-                                        },
-                                      ),
+                            ),
+                            Spacer(),
+                            IconButton(
+                              icon: Icon(Icons.power_settings_new, color: Colors.red),
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder:  (BuildContext context)
+                                    {
+                                      return AlertDialog(
+                                        backgroundColor:
+                                        kBackgroundColor,
+                                        title: Text(
+                                            'Do you really want to disconnect?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: Text('No'),
+                                            onPressed: () {
+                                              Navigator.of(
+                                                  context)
+                                                  .pop();
+                                            },
+                                          ),
+                                          TextButton(
+                                            child:
+                                            Text('Yes'),
+                                            onPressed: () {
+                                              Navigator.pushNamed(
+                                                  context,'/Principal',
+                                              );
+                                            },
 
-
-                                    ],
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(contenu),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      getNbLikes (idPub),
-                                    FutureBuilder<String>(
-                                    future: verifReact(id,idPub),
-                                    builder: (BuildContext context, snapshot) {
-                                   if (snapshot.hasData) {
-                                   var ok = snapshot.data;
-                                    return IconButton(
-                                  icon: snapshot.data == 'Like'?Icon(Icons.thumb_up, color:  Colors.green):Icon(Icons.thumb_up_alt),
-                                    onPressed: () async {
-
-                                      if (ok == 'Like' ) {
-                                        deleteReactLike(id, idPub);
-                                        setState(() {
-                                          ok = 'Erreur';
-                                        });
-                                      } else if (ok == 'Dislike' ) {
-                                        int idReaction = await getidR(id,idPub);
-                                        PutReactLike(idReaction,id,idPub,'Like');
-                                        setState(() {
-                                          ok = 'Like';
-                                        });
-                                      }else{
-                                      addReactLike(id,idPub,'Like');
-                                      setState(() {
-                                        ok = 'Like';
-                                      });
-                                      }
-                                    },
-                                    );
-                                    }else{
-                                      return Container(width: 0.0,height: 0.0,);
+                                          ),
+                                        ],
+                                      );
                                     }
-                                    },
-                                    ),
-                                      FutureBuilder<String>(
-                                        future: verifReact(id,idPub),
-                                        builder: (BuildContext context, snapshot) {
 
-                                          if (snapshot.hasData) {
-                                            var ok = snapshot.data;
-                                            return IconButton(
-                                              icon: ok == 'Dislike'
-                                                  ? Icon(Icons.thumb_down, color:  Colors.red)
-                                                  : Icon(Icons.thumb_down),
-                                              onPressed: () async {
+                                );
+                              },
+                            )
 
-                                                if (ok == 'Dislike') {
-                                                  deleteReactLike(id, idPub);
-                                                  setState(() {
-                                                    ok = 'Erreur';
-                                                  });
-                                                } else if (ok == 'Like') {
-                                                  int idReaction = await getidR(id,idPub);
-                                                  PutReactLike(idReaction,id,idPub,'Dislike');
-                                                  setState(() {
-                                                    ok = 'Dislike';
-                                                  });
-                                                }else{
-                                                  addReactLike(id, idPub,'Dislike');
-                                                  setState(() {
-                                                    ok = 'Dislike';
-                                                  });
-                                                }
-                                              },
-                                            );
+                          ],
+                        ),
+                        SizedBox(height: 25),
+                        FutureBuilder<List<dynamic>>(
+                          future: acceuilUSer(id,"user"),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              List<dynamic> publications = snapshot.data;
+                              return Container(
+                                height: 655,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: publications.length,
+                                  itemBuilder: (context, index) {
+                                    String contenu = publications[index]['contenu'];
+                                    var idPub = publications[index]['id'];
+                                    var auteur = publications[index]['idUser'];
+                                    String imagePub = publications[index]['img_pub'];
+                                    String UID = auteur.toString();
+                                    String type = publications[index]['type'];
+                                    if (type == "user") {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
 
-                                          }else{
-                                            return Container(width: 0.0, height: 0.0);
-                                          }
-                                        },
-                                      ),
-                                      getNbDislike (idPub),
-                                      IconButton(
-                                        icon: Icon(Icons.comment),
-                                        onPressed: () async {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                scrollable:  true,
-                                                backgroundColor: kBackgroundColor,
-                                                title: Text('Comments'),
-                                                content:   Column(
-                                                  children: [
-                                                    Container(
-                                                    width: 500,
-                                                      child: FutureBuilder(
-                                                        future: getComments(idPub),
-                                                        builder: (context, snapshot) {
-                                                          if (snapshot.hasData) {
-                                                            var comments = snapshot.data;
-                                                            if (comments.length > 0) {
-                                                              return Column(
-                                                                children: List.generate(comments.length, (index) {
-                                                                  var idAuteur = comments[index]['idUser'];
-                                                                  return Container(
-                                                                  decoration: BoxDecoration(
-                                                                  border: Border.all(),
-                                                                  borderRadius: BorderRadius.circular(10),),
-                                                                  child:Column(
-                                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    children: [
-                                                                      Row(
-                                                                        children: [
-                                                                          imgprofile2(idAuteur,id),
-                                                                          SizedBox(width: 10),
-                                                                          FutureBuilder<List<dynamic>>(
-                                                                            future: Future.wait([userinfos(idAuteur, 'lastName'), userinfos(idAuteur, 'firstName')]),
-                                                                            builder: (context, snapshot) {
-                                                                              if (snapshot.hasData ) {
-                                                                                return Text(
-                                                                                  snapshot.data[1].toString() +" "+ snapshot.data[0].toString() ,
-                                                                                  style: TextStyle(
-                                                                                    fontSize: 18.0,
-                                                                                    fontWeight: FontWeight.bold,),
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                                10),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(
+                                                    0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 5,
+                                                offset: Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment
+                                                .start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  imgprofile2(UID, id),
+                                                  SizedBox(width: 10),
+                                                  FutureBuilder<List<dynamic>>(
+                                                    future: Future.wait([
+                                                      userinfos(
+                                                          auteur, 'lastName'),
+                                                      userinfos(
+                                                          auteur, 'firstName')
+                                                    ]),
+                                                    builder: (context,
+                                                        snapshot) {
+                                                      if (snapshot.hasData) {
+                                                        return Text(
+                                                          snapshot.data[1]
+                                                              .toString() +
+                                                              " " +
+                                                              snapshot.data[0]
+                                                                  .toString(),
+                                                          style: TextStyle(
+                                                            fontSize: 18.0,
+                                                            fontWeight: FontWeight
+                                                                .bold,),
+                                                        );
+                                                      }
+                                                      return Container(
+                                                          width: 0.0,
+                                                          height: 0.0);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(contenu),
+
+                                              FutureBuilder(
+                                                  builder: (context, snapshot) {
+                                                    if (imagePub.length != 0) {
+                                                      return Image.network(
+                                                          imagePub);
+                                                    } else {
+                                                      return Container(
+                                                          width: 0.0,
+                                                          height: 0.0);
+                                                    }
+                                                  }
+
+                                              ),
+
+                                              SizedBox(height: 10),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  getNbLikes(idPub),
+                                                  FutureBuilder<String>(
+                                                    future: verifReact(
+                                                        id, idPub, "user"),
+                                                    builder: (
+                                                        BuildContext context,
+                                                        snapshot) {
+                                                      if (snapshot.hasData) {
+                                                        var ok = snapshot.data;
+                                                        return IconButton(
+                                                          icon: snapshot.data ==
+                                                              'Like'
+                                                              ? Icon(
+                                                              Icons.thumb_up,
+                                                              color: Colors
+                                                                  .green)
+                                                              : Icon(Icons
+                                                              .thumb_up_alt),
+                                                          onPressed: () async {
+                                                            if (ok == 'Like') {
+                                                              deleteReactLike(
+                                                                  id, idPub);
+                                                              setState(() {
+                                                                ok = 'Erreur';
+                                                              });
+                                                            } else if (ok ==
+                                                                'Dislike') {
+                                                              int idReaction = await getidR(
+                                                                  id, idPub);
+                                                              PutReactLike(
+                                                                  idReaction,
+                                                                  id, idPub,
+                                                                  'Like',
+                                                                  "user");
+                                                              setState(() {
+                                                                ok = 'Like';
+                                                              });
+                                                            } else {
+                                                              addReactLike(
+                                                                  id, idPub,
+                                                                  'Like',
+                                                                  "user");
+                                                              setState(() {
+                                                                ok = 'Like';
+                                                              });
+                                                            }
+                                                          },
+                                                        );
+                                                      } else {
+                                                        return Container(
+                                                          width: 0.0,
+                                                          height: 0.0,);
+                                                      }
+                                                    },
+                                                  ),
+                                                  FutureBuilder<String>(
+                                                    future: verifReact(
+                                                        id, idPub, "user"),
+                                                    builder: (
+                                                        BuildContext context,
+                                                        snapshot) {
+                                                      if (snapshot.hasData) {
+                                                        var ok = snapshot.data;
+                                                        return IconButton(
+                                                          icon: ok == 'Dislike'
+                                                              ? Icon(
+                                                              Icons.thumb_down,
+                                                              color: Colors.red)
+                                                              : Icon(
+                                                              Icons.thumb_down),
+                                                          onPressed: () async {
+                                                            if (ok ==
+                                                                'Dislike') {
+                                                              deleteReactLike(
+                                                                  id, idPub);
+                                                              setState(() {
+                                                                ok = 'Erreur';
+                                                              });
+                                                            } else
+                                                            if (ok == 'Like') {
+                                                              int idReaction = await getidR(
+                                                                  id, idPub);
+                                                              PutReactLike(
+                                                                  idReaction,
+                                                                  id, idPub,
+                                                                  'Dislike',
+                                                                  'user');
+                                                              setState(() {
+                                                                ok = 'Dislike';
+                                                              });
+                                                            } else {
+                                                              addReactLike(
+                                                                  id, idPub,
+                                                                  'Dislike',
+                                                                  'user');
+                                                              setState(() {
+                                                                ok = 'Dislike';
+                                                              });
+                                                            }
+                                                          },
+                                                        );
+                                                      } else {
+                                                        return Container(
+                                                            width: 0.0,
+                                                            height: 0.0);
+                                                      }
+                                                    },
+                                                  ),
+                                                  getNbDislike(idPub),
+                                                  IconButton(
+                                                    icon: Icon(Icons.comment),
+                                                    onPressed: () async {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (
+                                                            BuildContext context) {
+                                                          return AlertDialog(
+                                                            scrollable: true,
+                                                            backgroundColor: kBackgroundColor,
+                                                            title: Text(
+                                                                'Comments'),
+                                                            content: Column(
+                                                              children: [
+                                                                Container(
+                                                                  width: 500,
+                                                                  child: FutureBuilder(
+                                                                    future: getComments(
+                                                                        idPub),
+                                                                    builder: (
+                                                                        context,
+                                                                        snapshot) {
+                                                                      if (snapshot
+                                                                          .hasData) {
+                                                                        var comments = snapshot
+                                                                            .data;
+                                                                        if (comments
+                                                                            .length >
+                                                                            0) {
+                                                                          return Column(
+                                                                            children: List
+                                                                                .generate(
+                                                                                comments
+                                                                                    .length, (
+                                                                                index) {
+                                                                              var idAuteur = comments[index]['idUser'];
+                                                                              if (comments[index]['type'] ==
+                                                                                  "user") {
+                                                                                return Container(
+                                                                                  decoration: BoxDecoration(
+                                                                                    border: Border
+                                                                                        .all(),
+                                                                                    borderRadius: BorderRadius
+                                                                                        .circular(
+                                                                                        10),),
+                                                                                  child: Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                                          .start,
+                                                                                      children: [
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            imgprofile2(
+                                                                                                idAuteur,
+                                                                                                id),
+                                                                                            SizedBox(
+                                                                                                width: 10),
+                                                                                            FutureBuilder<
+                                                                                                List<
+                                                                                                    dynamic>>(
+                                                                                              future: Future
+                                                                                                  .wait(
+                                                                                                  [
+                                                                                                    userinfos(
+                                                                                                        idAuteur,
+                                                                                                        'lastName'),
+                                                                                                    userinfos(
+                                                                                                        idAuteur,
+                                                                                                        'firstName')
+                                                                                                  ]),
+                                                                                              builder: (
+                                                                                                  context,
+                                                                                                  snapshot) {
+                                                                                                if (snapshot
+                                                                                                    .hasData) {
+                                                                                                  return Text(
+                                                                                                    snapshot
+                                                                                                        .data[1]
+                                                                                                        .toString() +
+                                                                                                        " " +
+                                                                                                        snapshot
+                                                                                                            .data[0]
+                                                                                                            .toString(),
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 18.0,
+                                                                                                      fontWeight: FontWeight
+                                                                                                          .bold,),
+                                                                                                  );
+                                                                                                }
+                                                                                                return Container(
+                                                                                                    width: 0.0,
+                                                                                                    height: 0.0);
+                                                                                              },
+                                                                                            ),
+
+                                                                                          ],
+                                                                                        ),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+                                                                                        Text(
+                                                                                            '${comments[index]['contenu']}'),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+
+                                                                                      ]
+                                                                                  ), //Text('${comments[index]['contenu']}')
+                                                                                );
+                                                                              } else
+                                                                              if (comments[index]['type' ] ==
+                                                                                  "assoc") {
+                                                                                return Container(
+                                                                                  decoration: BoxDecoration(
+                                                                                    border: Border
+                                                                                        .all(),
+                                                                                    borderRadius: BorderRadius
+                                                                                        .circular(
+                                                                                        10),),
+                                                                                  child: Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                                          .start,
+                                                                                      children: [
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            imgPubAssoc(
+                                                                                                idAuteur,
+                                                                                                id),
+                                                                                            SizedBox(
+                                                                                                width: 10),
+                                                                                            FutureBuilder(
+                                                                                              future: Associnfos(
+                                                                                                  idAuteur,
+                                                                                                  'name'),
+                                                                                              builder: (
+                                                                                                  context,
+                                                                                                  snapshot) {
+                                                                                                if (snapshot
+                                                                                                    .hasData) {
+                                                                                                  return Text(
+                                                                                                    snapshot
+                                                                                                        .data
+                                                                                                        .toString(),
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 18.0,
+                                                                                                      fontWeight: FontWeight
+                                                                                                          .bold,),
+                                                                                                  );
+                                                                                                }
+                                                                                                return Container(
+                                                                                                    width: 0.0,
+                                                                                                    height: 0.0);
+                                                                                              },
+                                                                                            ),
+
+                                                                                          ],
+                                                                                        ),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+                                                                                        Text(
+                                                                                            '${comments[index]['contenu']}'),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+
+                                                                                      ]
+                                                                                  ), //Text('${comments[index]['contenu']}')
                                                                                 );
                                                                               }
-                                                                              return Container(width: 0.0, height: 0.0);
-                                                                            },
-                                                                          ),
+                                                                            }),
+                                                                          );
+                                                                        } else {
+                                                                          return Text(
+                                                                              'No comments');
+                                                                        }
+                                                                      } else {
+                                                                        return Container(
+                                                                            width: 0.0,
+                                                                            height: 0.0);
+                                                                      }
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            actions: [
+                                                              Padding(
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                    top: 8.0),
+                                                                child: TextField(
+                                                                  decoration: InputDecoration(
+                                                                    hintText: 'Add your comment',
+                                                                    focusedBorder: OutlineInputBorder(
+                                                                      borderSide: BorderSide(
+                                                                          color: appbarBackgroundColor), // Couleur du bord lorsqu'il est activé
+                                                                    ),
+                                                                    suffixIcon: IconButton(
+                                                                      icon: Icon(
+                                                                          Icons
+                                                                              .send),
+                                                                      onPressed: () {
+                                                                        addComments(
+                                                                            idPub,
+                                                                            id,
+                                                                            Comment,
+                                                                            "user");
+                                                                        showDialog(
+                                                                          context: context,
+                                                                          builder: (
+                                                                              BuildContext context) {
+                                                                            return AlertDialog(
+                                                                              title: Text(
+                                                                                  "Comment added"),
+                                                                              content: Text(
+                                                                                  "Your comment has been added successfully."),
+                                                                              backgroundColor: kBackgroundColor,
+                                                                              actions: [
+                                                                                ElevatedButton(
+                                                                                  child: Text(
+                                                                                      "OK"),
+                                                                                  onPressed: () {
+                                                                                    Navigator
+                                                                                        .pushNamed(
+                                                                                        context,
+                                                                                        '/home_users',
+                                                                                        arguments: id
+                                                                                    );
+                                                                                  },
+                                                                                ),
+                                                                              ],
+                                                                            );
+                                                                          },
+                                                                        );
+                                                                      },
+                                                                    ),
 
-                                                                    ],
-                                                                      ),
-                                                                      SizedBox(height: 10),
-                                                                      Text('${comments[index]['contenu']}'),
-                                                                      SizedBox(height: 10),
+                                                                  ),
+                                                                  onChanged: (
+                                                                      value) =>
+                                                                  Comment =
+                                                                      value,
+                                                                ),
+                                                              ),
 
-                                                                    ]
-                                                                  ) ,                                                       //Text('${comments[index]['contenu']}')
-                                                                  );
-                                                                }),
-                                                              );
-                                                            } else {
-                                                              return Text('No comments');
-                                                            }
-                                                          } else {
-                                                            return Container(width: 0.0, height: 0.0);
-                                                          }
+
+                                                              Row(
+                                                                children: [
+
+                                                                  Expanded(
+                                                                    child: TextButton(
+                                                                      child: Text(
+                                                                          'OK'),
+                                                                      onPressed: () {
+                                                                        Navigator
+                                                                            .of(
+                                                                            context)
+                                                                            .pop();
+                                                                      },
+                                                                    ),
+
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+
+                                                          );
                                                         },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                actions: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(top: 8.0),
-                                                    child: TextField(
-                                                      decoration: InputDecoration(
-                                                        hintText: 'Add your comment',
-                                                        focusedBorder: OutlineInputBorder(
-                                                          borderSide: BorderSide(color: appbarBackgroundColor), // Couleur du bord lorsqu'il est activé
-                                                        ),
-                                                        suffixIcon: IconButton(
-                                                          icon: Icon(Icons.send),
-                                                          onPressed: () {
-                                                            addComments(idPub,id,Comment);
-                                                            showDialog(
-                                                              context: context,
-                                                              builder: (BuildContext context) {
-                                                                return AlertDialog(
-                                                                  title: Text("Comment added"),
-                                                                  content: Text("Your comment has been added successfully."),
-                                                                  backgroundColor: kBackgroundColor,
-                                                                  actions: [
-                                                                    ElevatedButton(
-                                                                      child: Text("OK"),
+                                                      );
+                                                    },
+                                                  ),
+                                                  /* Compteur des Comments */
+
+                                                ],
+                                              ),
+                                              //  SizedBox(height: 30,)
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }else{
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(10),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 5,
+                                                offset: Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  imgPubAssoc(UID,id),
+                                                  SizedBox(width: 10),
+                                                  FutureBuilder(
+                                                    future:Associnfos(UID, "name"),
+                                                    builder: (context, snapshot) {
+                                                      if (snapshot.hasData ) {
+                                                        return Text(
+                                                          snapshot.data.toString()  ,
+                                                          style: TextStyle(
+                                                            fontSize: 18.0,
+                                                            fontWeight: FontWeight.bold,),
+                                                        );
+                                                      }
+                                                      return Container(width: 0.0, height: 0.0);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(contenu),
+
+                                              FutureBuilder(
+                                                  builder: (context, snapshot) {
+                                                    if (imagePub != null)
+                                                    {
+                                                      return Image.network(imagePub);
+                                                    }else{
+                                                      return Container(width: 0.0, height: 0.0);
+                                                    }
+                                                  }
+
+                                              ),
+
+                                              SizedBox(height: 10),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  getNbLikes (idPub),
+                                                  FutureBuilder<String>(
+                                                    future: verifReact(id,idPub,"assoc"),
+                                                    builder: (BuildContext context, snapshot) {
+                                                      if (snapshot.hasData) {
+                                                        var ok = snapshot.data;
+                                                        return IconButton(
+                                                          icon: snapshot.data == 'Like'?Icon(Icons.thumb_up, color:  Colors.green):Icon(Icons.thumb_up_alt),
+                                                          onPressed: () async {
+
+                                                            if (ok == 'Like' ) {
+                                                              deleteReactLike(id, idPub);
+                                                              setState(() {
+                                                                ok = 'Erreur';
+                                                              });
+                                                            } else if (ok == 'Dislike' ) {
+                                                              int idReaction = await getidR(id,idPub);
+                                                              PutReactLike(idReaction,id,idPub,'Like','assoc');
+                                                              setState(() {
+                                                                ok = 'Like';
+                                                              });
+                                                            }else{
+                                                              addReactLike(id,idPub,'Like','assoc');
+                                                              setState(() {
+                                                                ok = 'Like';
+                                                              });
+                                                            }
+                                                          },
+                                                        );
+                                                      }else{
+                                                        return Container(width: 0.0,height: 0.0,);
+                                                      }
+                                                    },
+                                                  ),
+                                                  FutureBuilder<String>(
+                                                    future: verifReact(id,idPub,"user"),
+                                                    builder: (BuildContext context, snapshot) {
+
+                                                      if (snapshot.hasData) {
+                                                        var ok = snapshot.data;
+                                                        return IconButton(
+                                                          icon: ok == 'Dislike'
+                                                              ? Icon(Icons.thumb_down, color:  Colors.red)
+                                                              : Icon(Icons.thumb_down),
+                                                          onPressed: () async {
+
+                                                            if (ok == 'Dislike') {
+                                                              deleteReactLike(id, idPub);
+                                                              setState(() {
+                                                                ok = 'Erreur';
+                                                              });
+                                                            } else if (ok == 'Like') {
+                                                              int idReaction = await getidR(id,idPub);
+                                                              PutReactLike(idReaction,id,idPub,'Dislike','assoc');
+                                                              setState(() {
+                                                                ok = 'Dislike';
+                                                              });
+                                                            }else{
+                                                              addReactLike(id, idPub,'Dislike','assoc');
+                                                              setState(() {
+                                                                ok = 'Dislike';
+                                                              });
+                                                            }
+                                                          },
+                                                        );
+
+                                                      }else{
+                                                        return Container(width: 0.0, height: 0.0);
+                                                      }
+                                                    },
+                                                  ),
+                                                  getNbDislike (idPub),
+                                                  IconButton(
+                                                    icon: Icon(Icons.comment),
+                                                    onPressed: () async {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return AlertDialog(
+                                                            scrollable:  true,
+                                                            backgroundColor: kBackgroundColor,
+                                                            title: Text('Comments'),
+                                                            content:   Column(
+                                                              children: [
+                                                                Container(
+                                                                  width: 500,
+                                                                  child: FutureBuilder(
+                                                                    future: getComments(idPub),
+                                                                    builder: (context, snapshot) {
+                                                                      if (snapshot.hasData) {
+                                                                        var comments = snapshot.data;
+                                                                        if (comments.length > 0) {
+                                                                          return Column(
+                                                                            children: List.generate(comments.length, (index) {
+                                                                              var idAuteur = comments[index]['idUser'];
+                                                                              if (comments[index]['type']=="user")
+                                                                              {
+                                                                                return Container(
+                                                                                  decoration: BoxDecoration(
+                                                                                    border: Border.all(),
+                                                                                    borderRadius: BorderRadius.circular(10),),
+                                                                                  child:Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            imgprofile2(idAuteur,id),
+                                                                                            SizedBox(width: 10),
+                                                                                            FutureBuilder<List<dynamic>>(
+                                                                                              future: Future.wait([userinfos(idAuteur, 'lastName'), userinfos(idAuteur, 'firstName')]),
+                                                                                              builder: (context, snapshot) {
+                                                                                                if (snapshot.hasData ) {
+                                                                                                  return Text(
+                                                                                                    snapshot.data[1].toString() +" "+ snapshot.data[0].toString() ,
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 18.0,
+                                                                                                      fontWeight: FontWeight.bold,),
+                                                                                                  );
+                                                                                                }
+                                                                                                return Container(width: 0.0, height: 0.0);
+                                                                                              },
+                                                                                            ),
+
+                                                                                          ],
+                                                                                        ),
+                                                                                        SizedBox(height: 10),
+                                                                                        Text('${comments[index]['contenu']}'),
+                                                                                        SizedBox(height: 10),
+
+                                                                                      ]
+                                                                                  ) ,                                                       //Text('${comments[index]['contenu']}')
+                                                                                );
+                                                                              }else if (comments[index]['type' ] == "assoc") {
+                                                                                return Container(
+                                                                                  decoration: BoxDecoration(
+                                                                                    border: Border
+                                                                                        .all(),
+                                                                                    borderRadius: BorderRadius
+                                                                                        .circular(
+                                                                                        10),),
+                                                                                  child: Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                                          .start,
+                                                                                      children: [
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            imgPubAssoc(
+                                                                                                idAuteur,
+                                                                                                id),
+                                                                                            SizedBox(
+                                                                                                width: 10),
+                                                                                            FutureBuilder(
+                                                                                              future: Associnfos(
+                                                                                                  idAuteur,
+                                                                                                  'name'),
+                                                                                              builder: (
+                                                                                                  context,
+                                                                                                  snapshot) {
+                                                                                                if (snapshot
+                                                                                                    .hasData) {
+                                                                                                  return Text(
+                                                                                                    snapshot
+                                                                                                        .data
+                                                                                                        .toString(),
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 18.0,
+                                                                                                      fontWeight: FontWeight
+                                                                                                          .bold,),
+                                                                                                  );
+                                                                                                }
+                                                                                                return Container(
+                                                                                                    width: 0.0,
+                                                                                                    height: 0.0);
+                                                                                              },
+                                                                                            ),
+
+                                                                                          ],
+                                                                                        ),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+                                                                                        Text(
+                                                                                            '${comments[index]['contenu']}'),
+                                                                                        SizedBox(
+                                                                                            height: 10),
+
+                                                                                      ]
+                                                                                  ), //Text('${comments[index]['contenu']}')
+                                                                                );
+                                                                              }
+                                                                            }),
+                                                                          );
+                                                                        } else {
+                                                                          return Text('No comments');
+                                                                        }
+                                                                      } else {
+                                                                        return Container(width: 0.0, height: 0.0);
+                                                                      }
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            actions: [
+                                                              Padding(
+                                                                padding: EdgeInsets.only(top: 8.0),
+                                                                child: TextField(
+                                                                  decoration: InputDecoration(
+                                                                    hintText: 'Add your comment',
+                                                                    focusedBorder: OutlineInputBorder(
+                                                                      borderSide: BorderSide(color: appbarBackgroundColor), // Couleur du bord lorsqu'il est activé
+                                                                    ),
+                                                                    suffixIcon: IconButton(
+                                                                      icon: Icon(Icons.send),
+                                                                      onPressed: () {
+                                                                        addComments(idPub,id,Comment,"assoc");
+                                                                        showDialog(
+                                                                          context: context,
+                                                                          builder: (BuildContext context) {
+                                                                            return AlertDialog(
+                                                                              title: Text("Comment added"),
+                                                                              content: Text("Your comment has been added successfully."),
+                                                                              backgroundColor: kBackgroundColor,
+                                                                              actions: [
+                                                                                ElevatedButton(
+                                                                                  child: Text("OK"),
+                                                                                  onPressed: () {
+                                                                                    Navigator.of(context).pop();
+                                                                                  },
+                                                                                ),
+                                                                              ],
+                                                                            );
+                                                                          },
+                                                                        );
+                                                                      },
+                                                                    ),
+
+                                                                  ),
+                                                                  onChanged: (value)=> Comment = value ,
+                                                                ),
+                                                              ),
+
+
+                                                              Row(
+                                                                children: [
+
+                                                                  Expanded(
+                                                                    child: TextButton(
+                                                                      child: Text('OK'),
                                                                       onPressed: () {
                                                                         Navigator.of(context).pop();
                                                                       },
                                                                     ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            );
-                                                          },
-                                                        ),
 
-                                                      ),
-                                                      onChanged: (value)=> Comment = value ,
-                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+
+                                                          );
+                                                        },
+                                                      );
+                                                    },
                                                   ),
+                                                  /* Compteur des Comments */
 
-
-                                                   Row(
-                                                     children: [
-
-                                                       Expanded(
-                                                         child: TextButton(
-                                                         child: Text('OK'),
-                                                         onPressed: () {
-                                                           Navigator.of(context).pop();
-                                                         },
-                                                       ),
-
-                                                       ),
-                                                     ],
-                                                   ),
                                                 ],
+                                              ),
+                                              //  SizedBox(height: 30,)
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
 
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      /* Compteur des Comments */
+                              );
 
-                                    ],
-                                  ),
-                                //  SizedBox(height: 30,)
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                    );
-
-                  } else {
-                    return Container(width: 0.0, height: 0.0);
-                  }
-                },
-              ),
-            ]
-                )
+                            } else {
+                              return Container(width: 0.0, height: 0.0);
+                            }
+                          },
+                        ),
+                      ]
+                  )
+          ),
         )
     );
 

@@ -24,7 +24,10 @@ class _ListFriendState extends State<ListFriend> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () =>  Navigator.pushNamed(
+              context,'/profile_user',
+              arguments:'$id;$id'
+          ),
         ),
         title: Text(
           'Friends',
@@ -69,15 +72,65 @@ class _ListFriendState extends State<ListFriend> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            ElevatedButton(
-                                onPressed: (){},
-                                child: Text('Remove from friend list'),
-                              style:  ElevatedButton.styleFrom(
-                                primary: appbarBackgroundColor,
-                                onPrimary: Colors.white,
-                              ),
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             children: [
+                             ElevatedButton(
+                               onPressed: (){},
+                               child: Icon(Icons.message_outlined),
+                               style:  ElevatedButton.styleFrom(
+                                 primary: appbarBackgroundColor,
+                                 onPrimary: Colors.white,
+                               ),
 
-                            ),
+                             ),
+                             ElevatedButton(
+                               onPressed: (){
+                                 showDialog(
+                                     context: context,
+                                     builder:  (BuildContext context)
+                                       {
+                                          return AlertDialog(
+                                            backgroundColor:
+                                            kBackgroundColor,
+                                            title: Text(
+                                                'Remove from the list of friends?'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: Text('No'),
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                      context)
+                                                      .pop();
+                                                },
+                                              ),
+                                              TextButton(
+                                                child:
+                                                Text('Yes'),
+                                                onPressed: () {
+                                                  deleteAmi(idAmi,id);
+                                                  Navigator.pushNamed(
+                                                      context,'/ListFriend',
+                                                      arguments:'$id;$id'
+                                                  );
+                                                },
+
+                                              ),
+                                            ],
+                                          );
+                                       }
+
+                                 );
+                                  },
+                               child: Icon(Icons.delete),
+                               style:  ElevatedButton.styleFrom(
+                                 primary: appbarBackgroundColor,
+                                 onPrimary: Colors.white,
+                               ),
+
+                             ),
+                           ],)
+
                           ],
 
                         )

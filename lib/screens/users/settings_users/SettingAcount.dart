@@ -24,7 +24,7 @@ class _SettingAcountState extends State<SettingAcount> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
-            'User Profile',
+            'Informations Profile',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -107,6 +107,41 @@ class _SettingAcountState extends State<SettingAcount> {
                                     IconButton(
                                       icon: Icon(
                                         Icons.email,
+                                        color: appbarBackgroundColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Phone",
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    FutureBuilder<dynamic>(
+                                      future: userinfos(id, 'numtel'),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          return Text(
+                                            snapshot.data.toString(),
+                                            style: TextStyle(
+                                              fontSize: 18.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          );
+                                        }
+                                        return Container(
+                                            width: 0.0, height: 0.0);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.phone_android,
                                         color: appbarBackgroundColor,
                                       ),
                                     ),
