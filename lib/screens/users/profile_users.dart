@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rv_firebase/Controller/AmisController.dart';
+import 'package:rv_firebase/Controller/PublicationController.dart';
 import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 
@@ -30,7 +32,7 @@ class _Profile_userState extends State<Profile_user> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () =>
-              Navigator.pushNamed(context, '/home_users', arguments: id),
+              Navigator.pushNamed(context, '/home_users', arguments: MyId),
         ),
         title: Text(
           'User Profile',

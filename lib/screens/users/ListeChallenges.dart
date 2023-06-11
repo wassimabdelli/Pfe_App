@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:rv_firebase/Controller/ChallengesController.dart';
 import 'package:rv_firebase/Widgets/contants.dart';
 import 'package:rv_firebase/Widgets/widgets.dart';
 import 'dart:io';
@@ -125,7 +126,7 @@ class _ListChallengesState extends State<ListChallenges> {
                                               color: Colors.blue,
                                             ),
                                           ),
-                                          SizedBox(height: 8.0), // Espacement entre le titre et le texte
+                                          SizedBox(height: 8.0),
                                           Text(
                                             desc,
                                             style: TextStyle(
@@ -146,7 +147,7 @@ class _ListChallengesState extends State<ListChallenges> {
                                               color: Colors.black,
                                             ),
                                           ),
-                                          SizedBox(height: 8.0), // Espacement entre le titre et le texte
+                                          SizedBox(height: 8.0),
                                           FutureBuilder(
                                             builder: (context, snapshot) {
                                               if (img != null ) {

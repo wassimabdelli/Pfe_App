@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rv_firebase">
    <application
-        android:label="rv_firebase"
-        android:icon="@mipmap/ic_launcher">
+        android:label="UniConnect"
+        android:icon="@mipmap/logouniconnect">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

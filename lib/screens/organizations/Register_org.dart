@@ -200,7 +200,7 @@ class _Register_orgState extends State<Register_org> {
             ElevatedButton(
               onPressed:() {
                 signup();
-                //alertRegister(context);
+                alertRegister(context);
                 print("object");
 
               } ,
